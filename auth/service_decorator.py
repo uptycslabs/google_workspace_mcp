@@ -1,3 +1,4 @@
+from auth.scopes import ADMIN_REPORTS_READ_ONLY_SCOPE
 import inspect
 import logging
 
@@ -42,6 +43,7 @@ from auth.scopes import (
     TASKS_SCOPE,
     TASKS_READONLY_SCOPE,
     CUSTOM_SEARCH_SCOPE,
+    ADMIN_REPORTS_READ_ONLY_SCOPE,
 )
 
 logger = logging.getLogger(__name__)
@@ -385,6 +387,7 @@ SERVICE_CONFIGS = {
     "slides": {"service": "slides", "version": "v1"},
     "tasks": {"service": "tasks", "version": "v1"},
     "customsearch": {"service": "customsearch", "version": "v1"},
+    "admin": {"service": "admin", "version":"reports_v1"},
 }
 
 
@@ -425,6 +428,8 @@ SCOPE_GROUPS = {
     "tasks_read": TASKS_READONLY_SCOPE,
     # Custom Search scope
     "customsearch": CUSTOM_SEARCH_SCOPE,
+    # Admin scopes
+    "admin_reports_read": ADMIN_REPORTS_READ_ONLY_SCOPE,
 }
 
 

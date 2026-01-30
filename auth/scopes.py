@@ -64,6 +64,9 @@ TASKS_READONLY_SCOPE = "https://www.googleapis.com/auth/tasks.readonly"
 # Google Custom Search API scope
 CUSTOM_SEARCH_SCOPE = "https://www.googleapis.com/auth/cse"
 
+# Google Admin Reports API scopes
+ADMIN_REPORTS_READ_ONLY_SCOPE = "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+
 # Base OAuth scopes required for user identification
 BASE_SCOPES = [USERINFO_EMAIL_SCOPE, USERINFO_PROFILE_SCOPE, OPENID_SCOPE]
 
@@ -99,6 +102,8 @@ TASKS_SCOPES = [TASKS_SCOPE, TASKS_READONLY_SCOPE]
 
 CUSTOM_SEARCH_SCOPES = [CUSTOM_SEARCH_SCOPE]
 
+ADMIN_SCOPES = [ADMIN_REPORTS_READ_ONLY_SCOPE]
+
 # Tool-to-scopes mapping
 TOOL_SCOPES_MAP = {
     "gmail": GMAIL_SCOPES,
@@ -111,6 +116,7 @@ TOOL_SCOPES_MAP = {
     "slides": SLIDES_SCOPES,
     "tasks": TASKS_SCOPES,
     "search": CUSTOM_SEARCH_SCOPES,
+    "admin": ADMIN_SCOPES,
 }
 
 
