@@ -530,9 +530,18 @@ def get_credentials(
     session_id: Optional[str] = None,
 ) -> Optional[Credentials]:
     """
-    Retrieves stored credentials, prioritizing OAuth 2.1 store, then session, then file. Refreshes if necessary.
+    Retrieves stored credentials with the following priority:
+    1. GOOGLE_ACCESS_TOKEN env var (direct token injection for stdio mode)
+    2. OAuth 2.1 session store (if session_id provided)
+    3. Single-user mode file-based credentials (if MCP_SINGLE_USER_MODE=1)
+    4. Session-based credentials
+    5. File-based credentials by user email
+
     If credentials are loaded from file and a session_id is present, they are cached in the session.
-    In single-user mode, bypasses session mapping and uses any available credentials.
+
+    Environment Variables:
+        GOOGLE_ACCESS_TOKEN: Direct access token to use (bypasses OAuth flow).
+            Note: Token refresh won't work since no refresh token is available.
 
     Args:
         user_google_email: Optional user's Google email.
@@ -544,6 +553,25 @@ def get_credentials(
     Returns:
         Valid Credentials object or None.
     """
+    # Check for direct access token via environment variable (highest priority)
+    # This allows passing a pre-obtained access token for stdio mode
+    direct_access_token = os.getenv("GOOGLE_ACCESS_TOKEN")
+    if direct_access_token:
+        logger.info(
+            "[get_credentials] Using direct access token from GOOGLE_ACCESS_TOKEN environment variable"
+        )
+        # Create credentials from the direct token
+        # Note: No refresh token available, so token refresh won't work
+        credentials = Credentials(
+            token=direct_access_token,
+            refresh_token=None,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
+            client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+            scopes=required_scopes,
+        )
+        return credentials
+
     # First, try OAuth 2.1 session store if we have a session_id (FastMCP session)
     if session_id:
         try:
