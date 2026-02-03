@@ -16,7 +16,15 @@ from auth.service_decorator import require_google_service
 # Configure module logger
 logger = logging.getLogger(__name__)
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Workspace Audit Log Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_activities", is_read_only=True, service_type='admin')
 @require_google_service("admin", "admin_reports_read")
 async def list_activities(
