@@ -555,21 +555,24 @@ def get_credentials(
     """
     # Check for direct access token via environment variable (highest priority)
     # This allows passing a pre-obtained access token for stdio mode
-    direct_access_token = os.getenv("GOOGLE_ACCESS_TOKEN")
+    direct_access_token = os.getenv("GOOGLE_OAUTH_ACCESS_TOKEN")
     if direct_access_token:
         logger.info(
-            "[get_credentials] Using direct access token from GOOGLE_ACCESS_TOKEN environment variable"
+            "[get_credentials] Using direct access token from GOOGLE_OAUTH_ACCESS_TOKEN environment variable"
         )
         # Create credentials from the direct token
         # Note: No refresh token available, so token refresh won't work
+        # Expect the direct_access_token provider to handle refresh
         credentials = Credentials(
             token=direct_access_token,
-            refresh_token=None,
-            token_uri="https://oauth2.googleapis.com/token",
-            client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
-            client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
             scopes=required_scopes,
         )
+
+        if not credentials.valid:
+            logger.warning(
+                "[get_credentials] Direct access token is not valid. Skipping."
+            )
+
         return credentials
 
     # First, try OAuth 2.1 session store if we have a session_id (FastMCP session)
