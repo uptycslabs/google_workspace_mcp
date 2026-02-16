@@ -16,13 +16,21 @@ from auth.service_decorator import require_google_service
 # Configure module logger
 logger = logging.getLogger(__name__)
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Workspace Audit Log Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_activities", is_read_only=True, service_type='admin')
 @require_google_service("admin", "admin_reports_read")
 async def list_activities(
     service, 
-    user_google_email: str, 
     application_name: Literal['access_transparency', 'admin', 'calendar', 'chat', 'chrome', 'classroom', 'context_aware_access', 'data_studio', 'drive', 'gcp', 'gemini_in_workspace_apps', 'gmail', 'gplus', 'groups', 'groups_enterprise', 'jamboard', 'keep', 'login', 'meet', 'mobile', 'rules', 'saml', 'token', 'user_accounts', 'vault'], 
+    user_google_email: str = "@", 
     user_key: str = "all", 
     max_results: int = 1000, 
     next_page_token: str = None,
@@ -40,8 +48,8 @@ async def list_activities(
         Use for tracking admin actions, user logins, Drive activity, and other workspace events.
 
         Args:
-            user_google_email (str): The user's Google email address. Required.
             application_name (str): Application to retrieve events for (e.g., 'admin', 'drive', 'login', 'gmail').
+            user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
             user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
             max_results (int): Results per page (max 1000). Defaults to 1000.
             next_page_token (Optional[str]): Token for pagination from previous response.
