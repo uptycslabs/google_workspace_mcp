@@ -531,7 +531,7 @@ def get_credentials(
 ) -> Optional[Credentials]:
     """
     Retrieves stored credentials with the following priority:
-    1. GOOGLE_ACCESS_TOKEN env var (direct token injection for stdio mode)
+    1. GOOGLE_OAUTH_ACCESS_TOKEN env var (direct token injection for stdio mode)
     2. OAuth 2.1 session store (if session_id provided)
     3. Single-user mode file-based credentials (if MCP_SINGLE_USER_MODE=1)
     4. Session-based credentials
@@ -540,7 +540,7 @@ def get_credentials(
     If credentials are loaded from file and a session_id is present, they are cached in the session.
 
     Environment Variables:
-        GOOGLE_ACCESS_TOKEN: Direct access token to use (bypasses OAuth flow).
+        GOOGLE_OAUTH_ACCESS_TOKEN: Direct access token to use (bypasses OAuth flow).
             Note: Token refresh won't work since no refresh token is available.
 
     Args:
