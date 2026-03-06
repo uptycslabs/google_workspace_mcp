@@ -4,6 +4,7 @@ Google Admin MCP Tools
 This module provides MCP tools for interacting with Google Admin APIs like Reports API, etc.
 """
 
+from googleapiclient.errors import HttpError
 import json
 import logging
 import asyncio
@@ -35,22 +36,30 @@ async def _list_activities_impl(
     """Internal implementation for listing activities."""
     logger.info(f"[list_activities] Invoked. Email: '{user_google_email}', User Key: '{user_key}', Application: '{application_name}'")
 
-    activities_response = await asyncio.to_thread(
-        lambda: service.activities().list(
-            userKey=user_key,
-            applicationName=application_name,
-            maxResults=max_results,
-            pageToken=next_page_token,
-            startTime=start_time,
-            endTime=end_time,
-            customerId=customer_id,
-            eventName=event_name,
-            actorIpAddress=actor_ip_address,
-            filters=filters,
-            orgUnitID=org_unit_id,
-            groupIdFilter=group_id_filter,
-        ).execute()
-    )
+    try:
+        activities_response = await asyncio.to_thread(
+            lambda: service.activities().list(
+                userKey=user_key,
+                applicationName=application_name,
+                maxResults=max_results,
+                pageToken=next_page_token,
+                startTime=start_time,
+                endTime=end_time,
+                customerId=customer_id,
+                eventName=event_name,
+                actorIpAddress=actor_ip_address,
+                filters=filters,
+                orgUnitID=org_unit_id,
+                groupIdFilter=group_id_filter,
+            ).execute()
+        )
+    except HttpError as get_error:
+        if get_error.status_code == 401:
+            message = f"API error [list_activities]: {get_error}."
+            logger.error(message)
+            raise Exception(message)
+        else:
+            raise 
 
     items = activities_response.get("items", [])
 
