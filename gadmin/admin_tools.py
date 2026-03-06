@@ -26,12 +26,9 @@ async def _list_activities_impl(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """Internal implementation for listing activities."""
     logger.info(f"[list_activities] Invoked. Email: '{user_google_email}', User Key: '{user_key}', Application: '{application_name}'")
@@ -45,12 +42,9 @@ async def _list_activities_impl(
                 pageToken=next_page_token,
                 startTime=start_time,
                 endTime=end_time,
-                customerId=customer_id,
                 eventName=event_name,
                 actorIpAddress=actor_ip_address,
                 filters=filters,
-                orgUnitID=org_unit_id,
-                groupIdFilter=group_id_filter,
             ).execute()
         )
     except HttpError as get_error:
@@ -86,12 +80,9 @@ async def list_activities_access_transparency(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Access Transparency audit activity logs (up to 180 days).
@@ -104,12 +95,9 @@ async def list_activities_access_transparency(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -123,12 +111,9 @@ async def list_activities_access_transparency(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -151,12 +136,9 @@ async def list_activities_admin(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Admin Console audit activity logs (up to 180 days).
@@ -169,12 +151,9 @@ async def list_activities_admin(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -188,12 +167,9 @@ async def list_activities_admin(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -216,12 +192,9 @@ async def list_activities_calendar(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Calendar audit activity logs (up to 180 days).
@@ -234,12 +207,9 @@ async def list_activities_calendar(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -253,12 +223,9 @@ async def list_activities_calendar(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -281,12 +248,9 @@ async def list_activities_chat(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Chat audit activity logs (up to 180 days).
@@ -299,12 +263,9 @@ async def list_activities_chat(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -318,12 +279,9 @@ async def list_activities_chat(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -346,12 +304,9 @@ async def list_activities_chrome(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Chrome Browser/OS audit activity logs (up to 180 days).
@@ -364,12 +319,9 @@ async def list_activities_chrome(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -383,12 +335,9 @@ async def list_activities_chrome(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -411,12 +360,9 @@ async def list_activities_classroom(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Classroom audit activity logs (up to 180 days).
@@ -429,12 +375,9 @@ async def list_activities_classroom(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -448,12 +391,9 @@ async def list_activities_classroom(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -476,12 +416,9 @@ async def list_activities_context_aware_access(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Context-Aware Access audit activity logs (up to 180 days).
@@ -494,12 +431,9 @@ async def list_activities_context_aware_access(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -513,12 +447,9 @@ async def list_activities_context_aware_access(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -541,12 +472,9 @@ async def list_activities_data_studio(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Looker Studio (Data Studio) audit activity logs (up to 180 days).
@@ -559,12 +487,9 @@ async def list_activities_data_studio(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -578,12 +503,9 @@ async def list_activities_data_studio(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -606,12 +528,9 @@ async def list_activities_drive(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Drive audit activity logs (up to 180 days).
@@ -624,12 +543,9 @@ async def list_activities_drive(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -643,12 +559,9 @@ async def list_activities_drive(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -671,12 +584,9 @@ async def list_activities_gcp(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Cloud Platform audit activity logs (up to 180 days).
@@ -689,12 +599,9 @@ async def list_activities_gcp(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -708,12 +615,9 @@ async def list_activities_gcp(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -736,12 +640,9 @@ async def list_activities_gemini_in_workspace_apps(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Gemini in Workspace Apps audit activity logs (up to 180 days).
@@ -754,12 +655,9 @@ async def list_activities_gemini_in_workspace_apps(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -773,12 +671,9 @@ async def list_activities_gemini_in_workspace_apps(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -801,12 +696,9 @@ async def list_activities_gmail(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Gmail audit activity logs (up to 180 days).
@@ -819,12 +711,9 @@ async def list_activities_gmail(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (str): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z'). Required for Gmail (max 30 days range).
         end_time (str): End of time range (RFC 3339). Required for Gmail.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -838,12 +727,9 @@ async def list_activities_gmail(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -866,12 +752,9 @@ async def list_activities_gplus(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google+ audit activity logs (up to 180 days).
@@ -884,12 +767,9 @@ async def list_activities_gplus(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -903,12 +783,9 @@ async def list_activities_gplus(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -931,12 +808,9 @@ async def list_activities_groups(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Groups audit activity logs (up to 180 days).
@@ -949,12 +823,9 @@ async def list_activities_groups(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -968,12 +839,9 @@ async def list_activities_groups(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -996,12 +864,9 @@ async def list_activities_groups_enterprise(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Groups Enterprise audit activity logs (up to 180 days).
@@ -1014,12 +879,9 @@ async def list_activities_groups_enterprise(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1033,12 +895,9 @@ async def list_activities_groups_enterprise(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1061,12 +920,9 @@ async def list_activities_jamboard(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Jamboard audit activity logs (up to 180 days).
@@ -1079,12 +935,9 @@ async def list_activities_jamboard(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1098,12 +951,9 @@ async def list_activities_jamboard(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1126,12 +976,9 @@ async def list_activities_keep(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Keep audit activity logs (up to 180 days).
@@ -1144,12 +991,9 @@ async def list_activities_keep(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1163,12 +1007,9 @@ async def list_activities_keep(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1191,12 +1032,9 @@ async def list_activities_login(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Login audit activity logs (up to 180 days).
@@ -1209,12 +1047,9 @@ async def list_activities_login(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1228,12 +1063,9 @@ async def list_activities_login(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1256,12 +1088,9 @@ async def list_activities_meet(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Meet audit activity logs (up to 180 days).
@@ -1274,12 +1103,9 @@ async def list_activities_meet(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1293,12 +1119,9 @@ async def list_activities_meet(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1321,12 +1144,9 @@ async def list_activities_mobile(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Mobile device audit activity logs (up to 180 days).
@@ -1339,12 +1159,9 @@ async def list_activities_mobile(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1358,12 +1175,9 @@ async def list_activities_mobile(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1386,12 +1200,9 @@ async def list_activities_rules(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Rules audit activity logs (up to 180 days).
@@ -1404,12 +1215,9 @@ async def list_activities_rules(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1423,12 +1231,9 @@ async def list_activities_rules(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1451,12 +1256,9 @@ async def list_activities_saml(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves SAML audit activity logs (up to 180 days).
@@ -1469,12 +1271,9 @@ async def list_activities_saml(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1488,12 +1287,9 @@ async def list_activities_saml(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1516,12 +1312,9 @@ async def list_activities_token(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Token audit activity logs (up to 180 days).
@@ -1534,12 +1327,9 @@ async def list_activities_token(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1553,12 +1343,9 @@ async def list_activities_token(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1581,12 +1368,9 @@ async def list_activities_user_accounts(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves User Accounts audit activity logs (up to 180 days).
@@ -1599,12 +1383,9 @@ async def list_activities_user_accounts(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1618,12 +1399,9 @@ async def list_activities_user_accounts(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
 
 
@@ -1646,12 +1424,9 @@ async def list_activities_vault(
     next_page_token: str = None,
     start_time: str = None,
     end_time: str = None,
-    customer_id: str = None,
     event_name: str = None,
     actor_ip_address: str = None,
     filters: str = None,
-    org_unit_id: str = None,
-    group_id_filter: str = None,
 ) -> str:
     """
     Retrieves Google Vault audit activity logs (up to 180 days).
@@ -1664,12 +1439,9 @@ async def list_activities_vault(
         next_page_token (Optional[str]): Token for pagination from previous response.
         start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
-        customer_id (Optional[str]): Customer ID to retrieve data for.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
-        org_unit_id (Optional[str]): Filter by organizational unit ID. Data before Dec 17, 2018 excluded.
-        group_id_filter (Optional[str]): Filter by group IDs (format: 'id:abc123,id:xyz456'). Requires allowlist setup.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1683,10 +1455,7 @@ async def list_activities_vault(
         next_page_token=next_page_token,
         start_time=start_time,
         end_time=end_time,
-        customer_id=customer_id,
         event_name=event_name,
         actor_ip_address=actor_ip_address,
         filters=filters,
-        org_unit_id=org_unit_id,
-        group_id_filter=group_id_filter,
     )
