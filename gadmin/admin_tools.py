@@ -97,7 +97,11 @@ async def list_activities_access_transparency(
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
         event_name (Optional[str]): Specific event name to filter by. Possible values: 'ACCESS'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'GSUITE_PRODUCT_NAME==Gmail'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -325,7 +329,11 @@ async def list_activities_admin(
             'VIEW_SITE_DETAILS', 'VIEW_TEMP_PASSWORD', 'WEAK_PROGRAMMATIC_LOGIN_SETTINGS_CHANGED',
             'WHITELISTED_GROUPS_UPDATED'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'USER_EMAIL==admin@example.com'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -388,7 +396,11 @@ async def list_activities_calendar(
             'delete_appointment_schedule', 'create_event', 'delete_event', 'add_event_guest',
             'change_event_guest_response_auto', 'remove_event_guest', 'change_event_guest_response'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'calendar_id==user@example.com'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -453,7 +465,11 @@ async def list_activities_chat(
             'room_details_updated', 'room_left', 'room_name_updated', 'room_unblocked',
             'unread_timestamp_updated', 'user_unblocked'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'room_id==spaces/ABCDEF'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -513,7 +529,11 @@ async def list_activities_chrome(
             'CHROME_OS_LOGIN_EVENT', 'CHROME_OS_LOGOUT_EVENT', 'CHROME_OS_REPORTING_DATA_LOST',
             'PASSWORD_CHANGED', 'PASSWORD_REUSE', 'DLP_EVENT'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'DEVICE_ID==ABC123'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -588,7 +608,11 @@ async def list_activities_classroom(
             'guardian_responded_to_invite', 'guardian_summaries_settings_updated_for_course',
             'guardian_updated_email', 'originality_report_created'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'course_id==123456789'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -645,7 +669,11 @@ async def list_activities_context_aware_access(
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'ACCESS_DENY_EVENT', 'ACCESS_DENY_INTERNAL_ERROR_EVENT'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'CAA_APPLICATION==Gmail'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -706,7 +734,11 @@ async def list_activities_data_studio(
             'CHANGE_ASSET_LINK_SHARING_ACCESS_TYPE', 'CHANGE_ASSET_LINK_SHARING_VISIBILITY',
             'CHANGE_USER_ACCESS', 'CHANGE_USER_ACCESS_TO_ASSET_VIA_WORKSPACE'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'ASSET_ID==abc123'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -788,7 +820,11 @@ async def list_activities_drive(
             'shared_drive_settings_change', 'sheets_import_range_access_change',
             'change_user_access', 'change_user_access_hierarchy_reconciled', 'storage_usage_update'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'doc_id==12345' or 'doc_id%3C%3E98765'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -846,7 +882,11 @@ async def list_activities_gcp(
             'IMPORT_SSH_PUBLIC_KEY', 'DELETE_POSIX_ACCOUNT', 'DELETE_SSH_PUBLIC_KEY',
             'GET_SSH_PUBLIC_KEY', 'GET_LOGIN_PROFILE', 'UPDATE_SSH_PUBLIC_KEY'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'USER_EMAIL==user@example.com'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -902,7 +942,11 @@ async def list_activities_gemini_in_workspace_apps(
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
         event_name (Optional[str]): Specific event name to filter by. Possible values: 'feature_utilization'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'app_name==docs'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -958,7 +1002,11 @@ async def list_activities_gmail(
         end_time (str): End of time range (RFC 3339). Required for Gmail.
         event_name (Optional[str]): Specific event name to filter by. Possible values: 'delivery'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'event_info.mail_event_type==1'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1017,7 +1065,11 @@ async def list_activities_gplus(
             'add_poll_vote', 'remove_poll_vote', 'create_post', 'delete_post',
             'content_manager_delete_post', 'edit_post'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'post_resource_name==posts/abc123'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1082,7 +1134,11 @@ async def list_activities_groups(
             'ban_user_with_moderation', 'revoke_invitation', 'invite_user', 'reject_join_request',
             'reinvite_user', 'remove_user', 'unsubscribe_via_mail'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'group_email==mygroup@example.com'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1148,7 +1204,11 @@ async def list_activities_groups_enterprise(
             'remove_security_setting', 'remove_service_account_permission', 'request_to_join',
             'revoke_invitation', 'unban_member'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'member_role==MEMBER'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1204,7 +1264,11 @@ async def list_activities_jamboard(
         end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'device_id==ABC123456'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1262,7 +1326,11 @@ async def list_activities_keep(
             'deleted_attachment', 'uploaded_attachment', 'edited_note_content', 'created_note',
             'deleted_note', 'modified_acl'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'owner_email==user@example.com'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1328,7 +1396,11 @@ async def list_activities_login(
             'login_failure', 'login_challenge', 'login_verification', 'logout',
             'risky_sensitive_action_allowed', 'risky_sensitive_action_blocked', 'login_success'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'login_type==google_password'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1392,7 +1464,11 @@ async def list_activities_meet(
             'ring_sent', 'transcription_activity', 'watermarking_active', 'watermarking_starting',
             'watermarking_stopped'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'conference_id==abc-defg-hij'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1455,7 +1531,11 @@ async def list_activities_mobile(
             'DEVICE_COMPROMISED_EVENT', 'FAILED_PASSWORD_ATTEMPTS_EVENT',
             'SUSPICIOUS_ACTIVITY_EVENT'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'DEVICE_TYPE==ANDROID'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1513,7 +1593,11 @@ async def list_activities_rules(
             'action_complete', 'label_applied', 'label_field_value_changed', 'label_removed',
             'rule_match', 'rule_trigger'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'rule_name==my-dlp-rule'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1570,7 +1654,11 @@ async def list_activities_saml(
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'login_failure', 'login_success'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'application_name==MyApp'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1627,7 +1715,11 @@ async def list_activities_token(
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'activity', 'authorize', 'request', 'revoke'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'app_name==MyOAuthApp'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1686,7 +1778,11 @@ async def list_activities_user_accounts(
             'recovery_phone_edit', 'recovery_secret_qa_edit', 'titanium_enroll',
             'titanium_unenroll', 'email_forwarding_out_of_domain'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'USER_EMAIL==user@example.com'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1780,7 +1876,11 @@ async def list_activities_vault(
             'view_per_matter_litigation_hold_report', 'view_retention_policy',
             'view_retention_settings', 'view_system_audit_log'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Event parameter filters (e.g., 'doc_id==12345').
+        filters (Optional[str]): Comma-separated event parameter filters.
+            Format: '{param}{operator}{value},{param}{operator}{value},...'
+            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Parameters must match event_name; mismatched parameters return empty results.
+            Example: 'matter_id==abc123'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
