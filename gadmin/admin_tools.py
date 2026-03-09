@@ -93,8 +93,8 @@ async def list_activities_access_transparency(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values: 'ACCESS'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Comma-separated event parameter filters.
@@ -153,8 +153,8 @@ async def list_activities_admin(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'ACCEPT_USER_INVITATION', 'ACTION_CANCELLED', 'ACTION_REQUESTED', 'ADD_APPLICATION',
             'ADD_APPLICATION_TO_WHITELIST', 'ADD_DISPLAY_NAME', 'ADD_DOMAIN_ALIAS',
@@ -385,8 +385,8 @@ async def list_activities_calendar(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'change_calendar_acls', 'change_calendar_country', 'create_calendar',
             'delete_calendar', 'change_calendar_description', 'export_calendar',
@@ -452,8 +452,8 @@ async def list_activities_chat(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'add_room_member', 'app_added', 'app_invoked', 'app_removed', 'attachment_download',
             'attachment_upload', 'block_room', 'block_user', 'conversation_read',
@@ -521,8 +521,8 @@ async def list_activities_chrome(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'CHROME_OS_ADD_USER', 'CHROME_OS_REMOVE_USER', 'DEVICE_BOOT_STATE_CHANGE',
             'CHROME_OS_LOGIN_FAILURE_EVENT', 'CHROME_OS_LOGIN_LOGOUT_EVENT',
@@ -585,8 +585,8 @@ async def list_activities_classroom(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'created_add_on_attachment', 'deleted_add_on_attachment',
             'updated_add_on_attachment_submission_grade', 'updated_add_on_attachment',
@@ -664,8 +664,8 @@ async def list_activities_context_aware_access(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'ACCESS_DENY_EVENT', 'ACCESS_DENY_INTERNAL_ERROR_EVENT'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
@@ -725,8 +725,8 @@ async def list_activities_data_studio(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'ADD_REPORT_EMAIL_DELIVERY', 'CREATE', 'DATA_EXPORT', 'DELETE', 'DOWNLOAD_REPORT',
             'EDIT', 'PARENT_WORKSPACE_CHANGE', 'RESTORE', 'STOP_REPORT_EMAIL_DELIVERY', 'TRASH',
@@ -790,8 +790,8 @@ async def list_activities_drive(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'deny_access_request', 'expire_access_request', 'request_access', 'add_to_folder',
             'appeal_abuse_violation', 'approval_canceled', 'approval_comment_added',
@@ -876,8 +876,8 @@ async def list_activities_gcp(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'IMPORT_SSH_PUBLIC_KEY', 'DELETE_POSIX_ACCOUNT', 'DELETE_SSH_PUBLIC_KEY',
             'GET_SSH_PUBLIC_KEY', 'GET_LOGIN_PROFILE', 'UPDATE_SSH_PUBLIC_KEY'.
@@ -938,8 +938,8 @@ async def list_activities_gemini_in_workspace_apps(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values: 'feature_utilization'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Comma-separated event parameter filters.
@@ -998,8 +998,8 @@ async def list_activities_gmail(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (str): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z'). Required for Gmail (max 30 days range).
-        end_time (str): End of time range (RFC 3339). Required for Gmail.
+        start_time (str): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Required. Must be before end_time and current time. Range with end_time must not exceed 30 days.
+        end_time (str): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Required. Range with start_time must not exceed 30 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values: 'delivery'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Comma-separated event parameter filters.
@@ -1058,8 +1058,8 @@ async def list_activities_gplus(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'create_comment', 'delete_comment', 'edit_comment', 'add_plusone', 'remove_plusone',
             'add_poll_vote', 'remove_poll_vote', 'create_post', 'delete_post',
@@ -1121,8 +1121,8 @@ async def list_activities_groups(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'change_acl_permission', 'accept_invitation', 'approve_join_request', 'join',
             'join_via_mail', 'request_to_join', 'request_to_join_via_mail', 'change_basic_setting',
@@ -1190,8 +1190,8 @@ async def list_activities_groups_enterprise(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'accept_invitation', 'add_info_setting', 'add_member', 'add_member_role',
             'add_security_setting', 'add_service_account_permission', 'approve_join_request',
@@ -1260,8 +1260,8 @@ async def list_activities_jamboard(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
         filters (Optional[str]): Comma-separated event parameter filters.
@@ -1320,8 +1320,8 @@ async def list_activities_keep(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'deleted_attachment', 'uploaded_attachment', 'edited_note_content', 'created_note',
             'deleted_note', 'modified_acl'.
@@ -1384,8 +1384,8 @@ async def list_activities_login(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             '2sv_disable', '2sv_enroll', 'password_edit', 'recovery_email_edit',
             'recovery_phone_edit', 'recovery_secret_qa_edit', 'account_disabled_password_leak',
@@ -1454,8 +1454,8 @@ async def list_activities_meet(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'abuse_report_submitted', 'broadcast_activity', 'call_ended', 'livestream_watched',
             'dialed_out', 'send_chat_everyone', 'in_meet_broadcast_activity', 'see_chat_everyone',
@@ -1522,8 +1522,8 @@ async def list_activities_mobile(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'APPLICATION_EVENT', 'APPLICATION_REPORT_EVENT', 'DEVICE_REGISTER_UNREGISTER_EVENT',
             'ADVANCED_POLICY_SYNC_EVENT', 'DEVICE_ACTION_EVENT', 'DEVICE_COMPLIANCE_CHANGED_EVENT',
@@ -1589,8 +1589,8 @@ async def list_activities_rules(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'action_complete', 'label_applied', 'label_field_value_changed', 'label_removed',
             'rule_match', 'rule_trigger'.
@@ -1651,8 +1651,8 @@ async def list_activities_saml(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'login_failure', 'login_success'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
@@ -1712,8 +1712,8 @@ async def list_activities_token(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'activity', 'authorize', 'request', 'revoke'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
@@ -1778,8 +1778,8 @@ async def list_activities_user_accounts(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             '2sv_disable', '2sv_enroll', 'password_edit', 'recovery_email_edit',
             'recovery_phone_edit', 'recovery_secret_qa_edit', 'titanium_enroll',
@@ -1840,8 +1840,8 @@ async def list_activities_vault(
         user_key (str): User profile ID or email to filter by, or 'all' for all users. Defaults to 'all'.
         max_results (int): Results per page (max 1000). Defaults to 1000.
         next_page_token (Optional[str]): Token for pagination from previous response.
-        start_time (Optional[str]): Start of time range (RFC 3339, e.g., '2024-01-15T10:00:00Z').
-        end_time (Optional[str]): End of time range (RFC 3339). Defaults to current time.
+        start_time (Optional[str]): RFC 3339 start of time range (e.g., '2024-01-15T10:00:00Z'). Must be before end_time and current time. Max 180 days of history available.
+        end_time (Optional[str]): RFC 3339 end of time range (e.g., '2024-01-15T10:26:35.000Z'). Defaults to current time. Must not be older than 180 days.
         event_name (Optional[str]): Specific event name to filter by. Possible values:
             'add_collaborator_begin', 'add_collaborator_end', 'add_litigation_hold_begin',
             'add_litigation_hold_end', 'add_preservation_rule_begin', 'add_preservation_rule_end',
