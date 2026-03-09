@@ -1329,8 +1329,10 @@ async def list_activities_keep(
         filters (Optional[str]): Comma-separated event parameter filters.
             Format: '{param}{operator}{value},{param}{operator}{value},...'
             Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Valid parameters: 'owner_email' (all events), 'note_name' (all events),
+            'attachment_name' (deleted_attachment, uploaded_attachment events only).
             Parameters must match event_name; mismatched parameters return empty results.
-            Example: 'owner_email==user@example.com'.
+            Example: 'owner_email==user@example.com' or 'note_name==My Note'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1718,8 +1720,13 @@ async def list_activities_token(
         filters (Optional[str]): Comma-separated event parameter filters.
             Format: '{param}{operator}{value},{param}{operator}{value},...'
             Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
+            Valid parameters (all events): 'app_name', 'client_id', 'client_type'.
+            Additional parameters for authorize/request/revoke: 'scope', 'scope_data'.
+            Additional parameters for activity only: 'api_name', 'method_name'.
+            'client_type' values: 'WEB', 'NATIVE_ANDROID', 'NATIVE_DESKTOP',
+            'CONNECTED_DEVICE', 'NATIVE_APPLICATION'.
             Parameters must match event_name; mismatched parameters return empty results.
-            Example: 'app_name==MyOAuthApp'.
+            Example: 'app_name==MyOAuthApp' or 'client_type==WEB'.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
@@ -1778,11 +1785,10 @@ async def list_activities_user_accounts(
             'recovery_phone_edit', 'recovery_secret_qa_edit', 'titanium_enroll',
             'titanium_unenroll', 'email_forwarding_out_of_domain'.
         actor_ip_address (Optional[str]): Filter by IP address where event occurred (IPv4/IPv6).
-        filters (Optional[str]): Comma-separated event parameter filters.
-            Format: '{param}{operator}{value},{param}{operator}{value},...'
-            Operators: ==, <> (%3C%3E), < (%3C), <= (%3C=), >, >=.
-            Parameters must match event_name; mismatched parameters return empty results.
-            Example: 'USER_EMAIL==user@example.com'.
+        filters (Optional[str]): Not applicable for user_accounts — no filterable event
+            parameters are documented for this application. Use 'user_key' to scope by
+            user and 'event_name' to scope by event type instead. Note: 'is_suspicious'
+            is a login application parameter, not user_accounts.
 
     Returns:
         str: JSON with activity records (items), pagination token (nextPageToken), and metadata.
