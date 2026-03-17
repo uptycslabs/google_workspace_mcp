@@ -4,6 +4,7 @@ Google Gmail MCP Tools
 This module provides MCP tools for interacting with the Gmail API.
 """
 
+import json
 import logging
 import asyncio
 import base64
@@ -381,13 +382,21 @@ def _format_gmail_results_plain(
     return "\n".join(lines)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Message Search",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("search_gmail_messages", is_read_only=True, service_type="gmail")
 @require_google_service("gmail", "gmail_read")
 async def search_gmail_messages(
     service,
     query: str,
-    user_google_email: str,
+    user_google_email: str = "@",
     page_size: int = 10,
     page_token: Optional[str] = None,
 ) -> str:
@@ -398,13 +407,12 @@ async def search_gmail_messages(
 
     Args:
         query (str): The search query. Supports standard Gmail search operators.
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         page_size (int): The maximum number of messages to return. Defaults to 10.
         page_token (Optional[str]): Token for retrieving the next page of results. Use the next_page_token from a previous response.
 
     Returns:
-        str: LLM-friendly structured results with Message IDs, Thread IDs, and clickable Gmail web interface URLs for each found message.
-        Includes pagination token if more results are available.
+        str: JSON with message IDs, thread IDs, pagination token (nextPageToken), and metadata.
     """
     logger.info(
         f"[search_gmail_messages] Email: '{user_google_email}', Query: '{query}', Page size: {page_size}"
@@ -435,33 +443,39 @@ async def search_gmail_messages(
     # Extract next page token for pagination
     next_page_token = response.get("nextPageToken")
 
-    formatted_output = _format_gmail_results_plain(messages, query, next_page_token)
-
     logger.info(f"[search_gmail_messages] Found {len(messages)} messages")
     if next_page_token:
         logger.info(
             "[search_gmail_messages] More results available (next_page_token present)"
         )
-    return formatted_output
+    return json.dumps(response)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Message Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "get_gmail_message_content", is_read_only=True, service_type="gmail"
 )
 @require_google_service("gmail", "gmail_read")
 async def get_gmail_message_content(
-    service, message_id: str, user_google_email: str
+    service, message_id: str, user_google_email: str = "@"
 ) -> str:
     """
     Retrieves the full content (subject, sender, recipients, plain text body) of a specific Gmail message.
 
     Args:
         message_id (str): The unique ID of the Gmail message to retrieve.
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: The message details including subject, sender, date, Message-ID, recipients (To, Cc), and body content.
+        str: JSON with message content including subject, sender, date, recipients, body, and attachments.
     """
     logger.info(
         f"[get_gmail_message_content] Invoked. Message ID: '{message_id}', Email: '{user_google_email}'"
@@ -515,37 +529,29 @@ async def get_gmail_message_content(
     # Extract attachment metadata
     attachments = _extract_attachments(payload)
 
-    content_lines = [
-        f"Subject: {subject}",
-        f"From:    {sender}",
-        f"Date:    {headers.get('Date', '(unknown date)')}",
-    ]
-
-    if rfc822_msg_id:
-        content_lines.append(f"Message-ID: {rfc822_msg_id}")
-
-    if to:
-        content_lines.append(f"To:      {to}")
-    if cc:
-        content_lines.append(f"Cc:      {cc}")
-
-    content_lines.append(f"\n--- BODY ---\n{body_data or '[No text/plain body found]'}")
-
-    # Add attachment information if present
-    if attachments:
-        content_lines.append("\n--- ATTACHMENTS ---")
-        for i, att in enumerate(attachments, 1):
-            size_kb = att["size"] / 1024
-            content_lines.append(
-                f"{i}. {att['filename']} ({att['mimeType']}, {size_kb:.1f} KB)\n"
-                f"   Attachment ID: {att['attachmentId']}\n"
-                f"   Use get_gmail_attachment_content(message_id='{message_id}', attachment_id='{att['attachmentId']}') to download"
-            )
-
-    return "\n".join(content_lines)
+    result = {
+        "message_id": message_id,
+        "subject": subject,
+        "from": sender,
+        "date": headers.get("Date", ""),
+        "message_id_header": rfc822_msg_id,
+        "to": to,
+        "cc": cc,
+        "body": body_data or "",
+        "attachments": attachments,
+    }
+    return json.dumps(result)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Messages Batch Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "get_gmail_messages_content_batch", is_read_only=True, service_type="gmail"
 )
@@ -553,7 +559,7 @@ async def get_gmail_message_content(
 async def get_gmail_messages_content_batch(
     service,
     message_ids: List[str],
-    user_google_email: str,
+    user_google_email: str = "@",
     format: Literal["full", "metadata"] = "full",
 ) -> str:
     """
@@ -562,11 +568,11 @@ async def get_gmail_messages_content_batch(
 
     Args:
         message_ids (List[str]): List of Gmail message IDs to retrieve (max 25 per batch).
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         format (Literal["full", "metadata"]): Message format. "full" includes body, "metadata" only headers.
 
     Returns:
-        str: A formatted list of message contents including subject, sender, date, Message-ID, recipients (To, Cc), and body (if full format).
+        str: JSON with list of message contents including subject, sender, date, recipients, and body.
     """
     logger.info(
         f"[get_gmail_messages_content_batch] Invoked. Message count: {len(message_ids)}, Email: '{user_google_email}'"
@@ -671,11 +677,11 @@ async def get_gmail_messages_content_batch(
             entry = results.get(mid, {"data": None, "error": "No result"})
 
             if entry["error"]:
-                output_messages.append(f"⚠️ Message {mid}: {entry['error']}\n")
+                output_messages.append({"message_id": mid, "error": str(entry["error"])})
             else:
                 message = entry["data"]
                 if not message:
-                    output_messages.append(f"⚠️ Message {mid}: No data returned\n")
+                    output_messages.append({"message_id": mid, "error": "No data returned"})
                     continue
 
                 # Extract content based on format
@@ -689,20 +695,16 @@ async def get_gmail_messages_content_batch(
                     cc = headers.get("Cc", "")
                     rfc822_msg_id = headers.get("Message-ID", "")
 
-                    msg_output = (
-                        f"Message ID: {mid}\nSubject: {subject}\nFrom: {sender}\n"
-                        f"Date: {headers.get('Date', '(unknown date)')}\n"
-                    )
-                    if rfc822_msg_id:
-                        msg_output += f"Message-ID: {rfc822_msg_id}\n"
-
-                    if to:
-                        msg_output += f"To: {to}\n"
-                    if cc:
-                        msg_output += f"Cc: {cc}\n"
-                    msg_output += f"Web Link: {_generate_gmail_web_url(mid)}\n"
-
-                    output_messages.append(msg_output)
+                    output_messages.append({
+                        "message_id": mid,
+                        "subject": subject,
+                        "from": sender,
+                        "date": headers.get("Date", ""),
+                        "message_id_header": rfc822_msg_id,
+                        "to": to,
+                        "cc": cc,
+                        "web_link": _generate_gmail_web_url(mid),
+                    })
                 else:
                     # Full format - extract body too
                     headers = _extract_headers(payload, GMAIL_METADATA_HEADERS)
@@ -720,31 +722,30 @@ async def get_gmail_messages_content_batch(
                     # Format body content with HTML fallback
                     body_data = _format_body_content(text_body, html_body)
 
-                    msg_output = (
-                        f"Message ID: {mid}\nSubject: {subject}\nFrom: {sender}\n"
-                        f"Date: {headers.get('Date', '(unknown date)')}\n"
-                    )
-                    if rfc822_msg_id:
-                        msg_output += f"Message-ID: {rfc822_msg_id}\n"
+                    output_messages.append({
+                        "message_id": mid,
+                        "subject": subject,
+                        "from": sender,
+                        "date": headers.get("Date", ""),
+                        "message_id_header": rfc822_msg_id,
+                        "to": to,
+                        "cc": cc,
+                        "body": body_data or "",
+                        "web_link": _generate_gmail_web_url(mid),
+                    })
 
-                    if to:
-                        msg_output += f"To: {to}\n"
-                    if cc:
-                        msg_output += f"Cc: {cc}\n"
-                    msg_output += (
-                        f"Web Link: {_generate_gmail_web_url(mid)}\n\n{body_data}\n"
-                    )
-
-                    output_messages.append(msg_output)
-
-    # Combine all messages with separators
-    final_output = f"Retrieved {len(message_ids)} messages:\n\n"
-    final_output += "\n---\n\n".join(output_messages)
-
-    return final_output
+    return json.dumps({"count": len(message_ids), "messages": output_messages})
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Attachment Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "get_gmail_attachment_content", is_read_only=True, service_type="gmail"
 )
@@ -753,7 +754,7 @@ async def get_gmail_attachment_content(
     service,
     message_id: str,
     attachment_id: str,
-    user_google_email: str,
+    user_google_email: str = "@",
 ) -> str:
     """
     Downloads the content of a specific email attachment.
@@ -761,10 +762,10 @@ async def get_gmail_attachment_content(
     Args:
         message_id (str): The ID of the Gmail message containing the attachment.
         attachment_id (str): The ID of the attachment to download.
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: Attachment metadata and base64-encoded content that can be decoded and saved.
+        str: JSON with attachment metadata and download URL or base64 content.
     """
     logger.info(
         f"[get_gmail_attachment_content] Invoked. Message ID: '{message_id}', Email: '{user_google_email}'"
@@ -789,11 +790,7 @@ async def get_gmail_attachment_content(
         logger.error(
             f"[get_gmail_attachment_content] Failed to download attachment: {e}"
         )
-        return (
-            f"Error: Failed to download attachment. The attachment ID may have changed.\n"
-            f"Please fetch the message content again to get an updated attachment ID.\n\n"
-            f"Error details: {str(e)}"
-        )
+        return json.dumps({"error": "Failed to download attachment. The attachment ID may have changed.", "details": str(e)})
 
     # Format response with attachment data
     size_bytes = attachment.get("size", 0)
@@ -804,19 +801,10 @@ async def get_gmail_attachment_content(
     from auth.oauth_config import is_stateless_mode
 
     if is_stateless_mode():
-        result_lines = [
-            "Attachment downloaded successfully!",
-            f"Message ID: {message_id}",
-            f"Size: {size_kb:.1f} KB ({size_bytes} bytes)",
-            "\n⚠️ Stateless mode: File storage disabled.",
-            "\nBase64-encoded content (first 100 characters shown):",
-            f"{base64_data[:100]}...",
-            "\nNote: Attachment IDs are ephemeral. Always use IDs from the most recent message fetch.",
-        ]
         logger.info(
             f"[get_gmail_attachment_content] Successfully downloaded {size_kb:.1f} KB attachment (stateless mode)"
         )
-        return "\n".join(result_lines)
+        return json.dumps({"message_id": message_id, "size_bytes": size_bytes, "size_kb": round(size_kb, 1), "stateless_mode": True, "base64_preview": base64_data[:100]})
 
     # Save attachment and generate URL
     try:
@@ -857,38 +845,17 @@ async def get_gmail_attachment_content(
         # Generate URL
         attachment_url = get_attachment_url(file_id)
 
-        result_lines = [
-            "Attachment downloaded successfully!",
-            f"Message ID: {message_id}",
-            f"Size: {size_kb:.1f} KB ({size_bytes} bytes)",
-            f"\n📎 Download URL: {attachment_url}",
-            "\nThe attachment has been saved and is available at the URL above.",
-            "The file will expire after 1 hour.",
-            "\nNote: Attachment IDs are ephemeral. Always use IDs from the most recent message fetch.",
-        ]
-
         logger.info(
             f"[get_gmail_attachment_content] Successfully saved {size_kb:.1f} KB attachment as {file_id}"
         )
-        return "\n".join(result_lines)
+        return json.dumps({"message_id": message_id, "size_bytes": size_bytes, "size_kb": round(size_kb, 1), "download_url": attachment_url, "expires_in": "1 hour"})
 
     except Exception as e:
         logger.error(
             f"[get_gmail_attachment_content] Failed to save attachment: {e}",
             exc_info=True,
         )
-        # Fallback to showing base64 preview
-        result_lines = [
-            "Attachment downloaded successfully!",
-            f"Message ID: {message_id}",
-            f"Size: {size_kb:.1f} KB ({size_bytes} bytes)",
-            "\n⚠️ Failed to save attachment file. Showing preview instead.",
-            "\nBase64-encoded content (first 100 characters shown):",
-            f"{base64_data[:100]}...",
-            f"\nError: {str(e)}",
-            "\nNote: Attachment IDs are ephemeral. Always use IDs from the most recent message fetch.",
-        ]
-        return "\n".join(result_lines)
+        return json.dumps({"message_id": message_id, "size_bytes": size_bytes, "size_kb": round(size_kb, 1), "error": "Failed to save attachment", "details": str(e), "base64_preview": base64_data[:100]})
 
 
 @server.tool()
@@ -1192,21 +1159,29 @@ def _format_thread_content(thread_data: dict, thread_id: str) -> str:
     return "\n".join(content_lines)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Thread Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("gmail", "gmail_read")
 @handle_http_errors("get_gmail_thread_content", is_read_only=True, service_type="gmail")
 async def get_gmail_thread_content(
-    service, thread_id: str, user_google_email: str
+    service, thread_id: str, user_google_email: str = "@"
 ) -> str:
     """
     Retrieves the complete content of a Gmail conversation thread, including all messages.
 
     Args:
         thread_id (str): The unique ID of the Gmail thread to retrieve.
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: The complete thread content with all messages formatted for reading.
+        str: JSON with complete thread data including all messages.
     """
     logger.info(
         f"[get_gmail_thread_content] Invoked. Thread ID: '{thread_id}', Email: '{user_google_email}'"
@@ -1217,10 +1192,18 @@ async def get_gmail_thread_content(
         service.users().threads().get(userId="me", id=thread_id, format="full").execute
     )
 
-    return _format_thread_content(thread_response, thread_id)
+    return json.dumps(thread_response)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Threads Batch Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("gmail", "gmail_read")
 @handle_http_errors(
     "get_gmail_threads_content_batch", is_read_only=True, service_type="gmail"
@@ -1228,7 +1211,7 @@ async def get_gmail_thread_content(
 async def get_gmail_threads_content_batch(
     service,
     thread_ids: List[str],
-    user_google_email: str,
+    user_google_email: str = "@",
 ) -> str:
     """
     Retrieves the content of multiple Gmail threads in a single batch request.
@@ -1236,10 +1219,10 @@ async def get_gmail_threads_content_batch(
 
     Args:
         thread_ids (List[str]): A list of Gmail thread IDs to retrieve. The function will automatically batch requests in chunks of 25.
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: A formatted list of thread contents with separators.
+        str: JSON with list of thread data including all messages in each thread.
     """
     logger.info(
         f"[get_gmail_threads_content_batch] Invoked. Thread count: {len(thread_ids)}, Email: '{user_google_email}'"
@@ -1315,66 +1298,46 @@ async def get_gmail_threads_content_batch(
             entry = results.get(tid, {"data": None, "error": "No result"})
 
             if entry["error"]:
-                output_threads.append(f"⚠️ Thread {tid}: {entry['error']}\n")
+                output_threads.append({"thread_id": tid, "error": str(entry["error"])})
             else:
                 thread = entry["data"]
                 if not thread:
-                    output_threads.append(f"⚠️ Thread {tid}: No data returned\n")
+                    output_threads.append({"thread_id": tid, "error": "No data returned"})
                     continue
 
-                output_threads.append(_format_thread_content(thread, tid))
+                output_threads.append(thread)
 
-    # Combine all threads with separators
-    header = f"Retrieved {len(thread_ids)} threads:"
-    return header + "\n\n" + "\n---\n\n".join(output_threads)
+    return json.dumps({"count": len(thread_ids), "threads": output_threads})
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Labels Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_gmail_labels", is_read_only=True, service_type="gmail")
 @require_google_service("gmail", "gmail_read")
-async def list_gmail_labels(service, user_google_email: str) -> str:
+async def list_gmail_labels(service, user_google_email: str = "@") -> str:
     """
     Lists all labels in the user's Gmail account.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: A formatted list of all labels with their IDs, names, and types.
+        str: JSON with list of all labels including their IDs, names, and types.
     """
     logger.info(f"[list_gmail_labels] Invoked. Email: '{user_google_email}'")
 
     response = await asyncio.to_thread(
         service.users().labels().list(userId="me").execute
     )
-    labels = response.get("labels", [])
 
-    if not labels:
-        return "No labels found."
-
-    lines = [f"Found {len(labels)} labels:", ""]
-
-    system_labels = []
-    user_labels = []
-
-    for label in labels:
-        if label.get("type") == "system":
-            system_labels.append(label)
-        else:
-            user_labels.append(label)
-
-    if system_labels:
-        lines.append("📂 SYSTEM LABELS:")
-        for label in system_labels:
-            lines.append(f"  • {label['name']} (ID: {label['id']})")
-        lines.append("")
-
-    if user_labels:
-        lines.append("🏷️  USER LABELS:")
-        for label in user_labels:
-            lines.append(f"  • {label['name']} (ID: {label['id']})")
-
-    return "\n".join(lines)
+    return json.dumps(response)
 
 
 @server.tool()
@@ -1456,18 +1419,26 @@ async def manage_gmail_label(
         return f"Label '{label_name}' (ID: {label_id}) deleted successfully!"
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Gmail Filters Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_gmail_filters", is_read_only=True, service_type="gmail")
 @require_google_service("gmail", "gmail_settings_basic")
-async def list_gmail_filters(service, user_google_email: str) -> str:
+async def list_gmail_filters(service, user_google_email: str = "@") -> str:
     """
     Lists all Gmail filters configured in the user's mailbox.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: A formatted list of filters with their criteria and actions.
+        str: JSON with list of filters including their criteria and actions.
     """
     logger.info(f"[list_gmail_filters] Invoked. Email: '{user_google_email}'")
 
@@ -1475,63 +1446,7 @@ async def list_gmail_filters(service, user_google_email: str) -> str:
         service.users().settings().filters().list(userId="me").execute
     )
 
-    filters = response.get("filter") or response.get("filters") or []
-
-    if not filters:
-        return "No filters found."
-
-    lines = [f"Found {len(filters)} filters:", ""]
-
-    for filter_obj in filters:
-        filter_id = filter_obj.get("id", "(no id)")
-        criteria = filter_obj.get("criteria", {})
-        action = filter_obj.get("action", {})
-
-        lines.append(f"🔹 Filter ID: {filter_id}")
-        lines.append("  Criteria:")
-
-        criteria_lines = []
-        if criteria.get("from"):
-            criteria_lines.append(f"From: {criteria['from']}")
-        if criteria.get("to"):
-            criteria_lines.append(f"To: {criteria['to']}")
-        if criteria.get("subject"):
-            criteria_lines.append(f"Subject: {criteria['subject']}")
-        if criteria.get("query"):
-            criteria_lines.append(f"Query: {criteria['query']}")
-        if criteria.get("negatedQuery"):
-            criteria_lines.append(f"Exclude Query: {criteria['negatedQuery']}")
-        if criteria.get("hasAttachment"):
-            criteria_lines.append("Has attachment")
-        if criteria.get("excludeChats"):
-            criteria_lines.append("Exclude chats")
-        if criteria.get("size"):
-            comparison = criteria.get("sizeComparison", "")
-            criteria_lines.append(
-                f"Size {comparison or ''} {criteria['size']} bytes".strip()
-            )
-
-        if not criteria_lines:
-            criteria_lines.append("(none)")
-
-        lines.extend([f"    • {line}" for line in criteria_lines])
-
-        lines.append("  Actions:")
-        action_lines = []
-        if action.get("forward"):
-            action_lines.append(f"Forward to: {action['forward']}")
-        if action.get("removeLabelIds"):
-            action_lines.append(f"Remove labels: {', '.join(action['removeLabelIds'])}")
-        if action.get("addLabelIds"):
-            action_lines.append(f"Add labels: {', '.join(action['addLabelIds'])}")
-
-        if not action_lines:
-            action_lines.append("(none)")
-
-        lines.extend([f"    • {line}" for line in action_lines])
-        lines.append("")
-
-    return "\n".join(lines).rstrip()
+    return json.dumps(response)
 
 
 @server.tool()

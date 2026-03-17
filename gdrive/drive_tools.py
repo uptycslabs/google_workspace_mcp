@@ -5,6 +5,7 @@ This module provides MCP tools for interacting with Google Drive API.
 """
 
 import asyncio
+import json
 import logging
 import io
 import httpx
@@ -44,13 +45,21 @@ DOWNLOAD_CHUNK_SIZE_BYTES = 256 * 1024  # 256 KB
 UPLOAD_CHUNK_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB (Google recommended minimum)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive Files Search",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("search_drive_files", is_read_only=True, service_type="drive")
 @require_google_service("drive", "drive_read")
 async def search_drive_files(
     service,
-    user_google_email: str,
-    query: str,
+    user_google_email: str = "@",
+    query: str = "",
     page_size: int = 10,
     drive_id: Optional[str] = None,
     include_items_from_all_drives: bool = True,
@@ -60,7 +69,7 @@ async def search_drive_files(
     Searches for files and folders within a user's Google Drive, including shared drives.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         query (str): The search query string. Supports Google Drive search operators.
         page_size (int): The maximum number of files to return. Defaults to 10.
         drive_id (Optional[str]): ID of the shared drive to search. If None, behavior depends on `corpora` and `include_items_from_all_drives`.
@@ -70,7 +79,7 @@ async def search_drive_files(
                                  Otherwise, Drive API default behavior applies. Prefer 'user' or 'drive' over 'allDrives' for efficiency.
 
     Returns:
-        str: A formatted list of found files/folders with their details (ID, name, type, size, modified time, link).
+        str: JSON with list of found files/folders including their IDs, names, types, sizes, and links.
     """
     logger.info(
         f"[search_drive_files] Invoked. Email: '{user_google_email}', Query: '{query}'"
@@ -106,25 +115,24 @@ async def search_drive_files(
     if not files:
         return f"No files found for '{query}'."
 
-    formatted_files_text_parts = [
-        f"Found {len(files)} files for {user_google_email} matching '{query}':"
-    ]
-    for item in files:
-        size_str = f", Size: {item.get('size', 'N/A')}" if "size" in item else ""
-        formatted_files_text_parts.append(
-            f'- Name: "{item["name"]}" (ID: {item["id"]}, Type: {item["mimeType"]}{size_str}, Modified: {item.get("modifiedTime", "N/A")}) Link: {item.get("webViewLink", "#")}'
-        )
-    text_output = "\n".join(formatted_files_text_parts)
-    return text_output
+    return json.dumps(results)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive File Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("get_drive_file_content", is_read_only=True, service_type="drive")
 @require_google_service("drive", "drive_read")
 async def get_drive_file_content(
     service,
-    user_google_email: str,
-    file_id: str,
+    user_google_email: str = "@",
+    file_id: str = "",
 ) -> str:
     """
     Retrieves the content of a specific Google Drive file by ID, supporting files in shared drives.
@@ -135,11 +143,11 @@ async def get_drive_file_content(
     • Any other file → downloaded; tries UTF-8 decode, else notes binary.
 
     Args:
-        user_google_email: The user’s Google email address.
+        user_google_email (str): The user’s Google email address. Defaults to ‘@’ (applies to all users).
         file_id: Drive file ID.
 
     Returns:
-        str: The file content as plain text with metadata header.
+        str: JSON with file metadata and content.
     """
     logger.info(f"[get_drive_file_content] Invoked. File ID: '{file_id}'")
 
@@ -201,23 +209,32 @@ async def get_drive_file_content(
                 f"{len(file_content_bytes)} bytes]"
             )
 
-    # Assemble response
-    header = (
-        f'File: "{file_name}" (ID: {file_id}, Type: {mime_type})\n'
-        f"Link: {file_metadata.get('webViewLink', '#')}\n\n--- CONTENT ---\n"
-    )
-    return header + body_text
+    return json.dumps({
+        "file_name": file_name,
+        "file_id": file_id,
+        "mime_type": mime_type,
+        "web_view_link": file_metadata.get("webViewLink", ""),
+        "content": body_text,
+    })
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive File Download URL Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "get_drive_file_download_url", is_read_only=True, service_type="drive"
 )
 @require_google_service("drive", "drive_read")
 async def get_drive_file_download_url(
     service,
-    user_google_email: str,
-    file_id: str,
+    user_google_email: str = "@",
+    file_id: str = "",
     export_format: Optional[str] = None,
 ) -> str:
     """
@@ -231,14 +248,14 @@ async def get_drive_file_download_url(
     For other files, downloads the original file format.
 
     Args:
-        user_google_email: The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         file_id: The Google Drive file ID to get a download URL for.
         export_format: Optional export format for Google native files.
                       Options: 'pdf', 'docx', 'xlsx', 'csv', 'pptx'.
                       If not specified, uses sensible defaults (PDF for Docs/Slides, XLSX for Sheets).
 
     Returns:
-        str: Download URL and file metadata. The file is available at the URL for 1 hour.
+        str: JSON with file metadata and download URL. The file is available at the URL for 1 hour.
     """
     logger.info(
         f"[get_drive_file_download_url] Invoked. File ID: '{file_id}', Export format: {export_format}"
@@ -323,20 +340,10 @@ async def get_drive_file_download_url(
 
     # Check if we're in stateless mode (can't save files)
     if is_stateless_mode():
-        result_lines = [
-            "File downloaded successfully!",
-            f"File: {file_name}",
-            f"File ID: {file_id}",
-            f"Size: {size_kb:.1f} KB ({size_bytes} bytes)",
-            f"MIME Type: {output_mime_type}",
-            "\n⚠️ Stateless mode: File storage disabled.",
-            "\nBase64-encoded content (first 100 characters shown):",
-            f"{base64.b64encode(file_content_bytes[:100]).decode('utf-8')}...",
-        ]
         logger.info(
             f"[get_drive_file_download_url] Successfully downloaded {size_kb:.1f} KB file (stateless mode)"
         )
-        return "\n".join(result_lines)
+        return json.dumps({"file_name": file_name, "file_id": file_id, "size_bytes": size_bytes, "mime_type": output_mime_type, "stateless_mode": True})
 
     # Save file and generate URL
     try:
@@ -355,42 +362,30 @@ async def get_drive_file_download_url(
         # Generate URL
         download_url = get_attachment_url(saved_file_id)
 
-        result_lines = [
-            "File downloaded successfully!",
-            f"File: {file_name}",
-            f"File ID: {file_id}",
-            f"Size: {size_kb:.1f} KB ({size_bytes} bytes)",
-            f"MIME Type: {output_mime_type}",
-            f"\n📎 Download URL: {download_url}",
-            "\nThe file has been saved and is available at the URL above.",
-            "The file will expire after 1 hour.",
-        ]
-
-        if export_mime_type:
-            result_lines.append(
-                f"\nNote: Google native file exported to {output_mime_type} format."
-            )
-
         logger.info(
             f"[get_drive_file_download_url] Successfully saved {size_kb:.1f} KB file as {saved_file_id}"
         )
-        return "\n".join(result_lines)
+        return json.dumps({"file_name": file_name, "file_id": file_id, "size_bytes": size_bytes, "mime_type": output_mime_type, "download_url": download_url, "expires_in": "1 hour"})
 
     except Exception as e:
         logger.error(f"[get_drive_file_download_url] Failed to save file: {e}")
-        return (
-            f"Error: Failed to save file for download.\n"
-            f"File was downloaded successfully ({size_kb:.1f} KB) but could not be saved.\n\n"
-            f"Error details: {str(e)}"
-        )
+        return json.dumps({"error": "Failed to save file for download.", "file_name": file_name, "file_id": file_id, "size_bytes": size_bytes, "details": str(e)})
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive Items Lister",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_drive_items", is_read_only=True, service_type="drive")
 @require_google_service("drive", "drive_read")
 async def list_drive_items(
     service,
-    user_google_email: str,
+    user_google_email: str = "@",
     folder_id: str = "root",
     page_size: int = 100,
     drive_id: Optional[str] = None,
@@ -403,7 +398,7 @@ async def list_drive_items(
     If `drive_id` is not specified, lists items from user's "My Drive" and accessible shared drives (if `include_items_from_all_drives` is True).
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         folder_id (str): The ID of the Google Drive folder. Defaults to 'root'. For a shared drive, this can be the shared drive's ID to list its root, or a folder ID within that shared drive.
         page_size (int): The maximum number of items to return. Defaults to 100.
         drive_id (Optional[str]): ID of the shared drive. If provided, the listing is scoped to this drive.
@@ -411,7 +406,7 @@ async def list_drive_items(
         corpora (Optional[str]): Corpus to query ('user', 'drive', 'allDrives'). If `drive_id` is set and `corpora` is None, 'drive' is used. If None and no `drive_id`, API defaults apply.
 
     Returns:
-        str: A formatted list of files/folders in the specified folder.
+        str: JSON with list of files/folders in the specified folder including their IDs, names, types, and links.
     """
     logger.info(
         f"[list_drive_items] Invoked. Email: '{user_google_email}', Folder ID: '{folder_id}'"
@@ -433,16 +428,7 @@ async def list_drive_items(
     if not files:
         return f"No items found in folder '{folder_id}'."
 
-    formatted_items_text_parts = [
-        f"Found {len(files)} items in folder '{folder_id}' for {user_google_email}:"
-    ]
-    for item in files:
-        size_str = f", Size: {item.get('size', 'N/A')}" if "size" in item else ""
-        formatted_items_text_parts.append(
-            f'- Name: "{item["name"]}" (ID: {item["id"]}, Type: {item["mimeType"]}{size_str}, Modified: {item.get("modifiedTime", "N/A")}) Link: {item.get("webViewLink", "#")}'
-        )
-    text_output = "\n".join(formatted_items_text_parts)
-    return text_output
+    return json.dumps(results)
 
 
 @server.tool()
@@ -680,25 +666,33 @@ async def create_drive_file(
     return confirmation_message
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive File Permissions Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "get_drive_file_permissions", is_read_only=True, service_type="drive"
 )
 @require_google_service("drive", "drive_read")
 async def get_drive_file_permissions(
     service,
-    user_google_email: str,
-    file_id: str,
+    user_google_email: str = "@",
+    file_id: str = "",
 ) -> str:
     """
     Gets detailed metadata about a Google Drive file including sharing permissions.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         file_id (str): The ID of the file to check permissions for.
 
     Returns:
-        str: Detailed file metadata including sharing status and URLs.
+        str: JSON with detailed file metadata including sharing status, permissions, and URLs.
     """
     logger.info(
         f"[get_drive_file_permissions] Checking file {file_id} for {user_google_email}"
@@ -721,93 +715,40 @@ async def get_drive_file_permissions(
             .execute
         )
 
-        # Format the response
-        output_parts = [
-            f"File: {file_metadata.get('name', 'Unknown')}",
-            f"ID: {file_id}",
-            f"Type: {file_metadata.get('mimeType', 'Unknown')}",
-            f"Size: {file_metadata.get('size', 'N/A')} bytes",
-            f"Modified: {file_metadata.get('modifiedTime', 'N/A')}",
-            "",
-            "Sharing Status:",
-            f"  Shared: {file_metadata.get('shared', False)}",
-        ]
-
-        # Add sharing user if available
-        sharing_user = file_metadata.get("sharingUser")
-        if sharing_user:
-            output_parts.append(
-                f"  Shared by: {sharing_user.get('displayName', 'Unknown')} ({sharing_user.get('emailAddress', 'Unknown')})"
-            )
-
-        # Process permissions
-        permissions = file_metadata.get("permissions", [])
-        if permissions:
-            output_parts.append(f"  Number of permissions: {len(permissions)}")
-            output_parts.append("  Permissions:")
-            for perm in permissions:
-                output_parts.append(f"    - {format_permission_info(perm)}")
-        else:
-            output_parts.append("  No additional permissions (private file)")
-
-        # Add URLs
-        output_parts.extend(
-            [
-                "",
-                "URLs:",
-                f"  View Link: {file_metadata.get('webViewLink', 'N/A')}",
-            ]
-        )
-
-        # webContentLink is only available for files that can be downloaded
-        web_content_link = file_metadata.get("webContentLink")
-        if web_content_link:
-            output_parts.append(f"  Direct Download Link: {web_content_link}")
-
-        has_public_link = check_public_link_permission(permissions)
-
-        if has_public_link:
-            output_parts.extend(
-                [
-                    "",
-                    "✅ This file is shared with 'Anyone with the link' - it can be inserted into Google Docs",
-                ]
-            )
-        else:
-            output_parts.extend(
-                [
-                    "",
-                    "❌ This file is NOT shared with 'Anyone with the link' - it cannot be inserted into Google Docs",
-                    "   To fix: Right-click the file in Google Drive → Share → Anyone with the link → Viewer",
-                ]
-            )
-
-        return "\n".join(output_parts)
+        return json.dumps(file_metadata)
 
     except Exception as e:
         logger.error(f"Error getting file permissions: {e}")
-        return f"Error getting file permissions: {e}"
+        return json.dumps({"error": str(e)})
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive File Public Access Checker",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "check_drive_file_public_access", is_read_only=True, service_type="drive"
 )
 @require_google_service("drive", "drive_read")
 async def check_drive_file_public_access(
     service,
-    user_google_email: str,
-    file_name: str,
+    user_google_email: str = "@",
+    file_name: str = "",
 ) -> str:
     """
     Searches for a file by name and checks if it has public link sharing enabled.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         file_name (str): The name of the file to check.
 
     Returns:
-        str: Information about the file's sharing status and whether it can be used in Google Docs.
+        str: JSON with file metadata and public access status.
     """
     logger.info(f"[check_drive_file_public_access] Searching for {file_name}")
 
@@ -827,16 +768,7 @@ async def check_drive_file_public_access(
 
     files = results.get("files", [])
     if not files:
-        return f"No file found with name '{file_name}'"
-
-    if len(files) > 1:
-        output_parts = [f"Found {len(files)} files with name '{file_name}':"]
-        for f in files:
-            output_parts.append(f"  - {f['name']} (ID: {f['id']})")
-        output_parts.append("\nChecking the first file...")
-        output_parts.append("")
-    else:
-        output_parts = []
+        return json.dumps({"error": f"No file found with name '{file_name}'"})
 
     # Check permissions for the first file
     file_id = files[0]["id"]
@@ -858,32 +790,11 @@ async def check_drive_file_public_access(
 
     has_public_link = check_public_link_permission(permissions)
 
-    output_parts.extend(
-        [
-            f"File: {file_metadata['name']}",
-            f"ID: {file_id}",
-            f"Type: {file_metadata['mimeType']}",
-            f"Shared: {file_metadata.get('shared', False)}",
-            "",
-        ]
-    )
-
-    if has_public_link:
-        output_parts.extend(
-            [
-                "✅ PUBLIC ACCESS ENABLED - This file can be inserted into Google Docs",
-                f"Use with insert_doc_image_url: {get_drive_image_url(file_id)}",
-            ]
-        )
-    else:
-        output_parts.extend(
-            [
-                "❌ NO PUBLIC ACCESS - Cannot insert into Google Docs",
-                "Fix: Drive → Share → 'Anyone with the link' → 'Viewer'",
-            ]
-        )
-
-    return "\n".join(output_parts)
+    return json.dumps({
+        "files_found": len(files),
+        "file": file_metadata,
+        "has_public_access": has_public_link,
+    })
 
 
 @server.tool()
@@ -1063,23 +974,31 @@ async def update_drive_file(
     return "\n".join(output_parts)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Drive File Shareable Link Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("get_drive_shareable_link", is_read_only=True, service_type="drive")
 @require_google_service("drive", "drive_read")
 async def get_drive_shareable_link(
     service,
-    user_google_email: str,
-    file_id: str,
+    user_google_email: str = "@",
+    file_id: str = "",
 ) -> str:
     """
     Gets the shareable link for a Google Drive file or folder.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         file_id (str): The ID of the file or folder to get the shareable link for. Required.
 
     Returns:
-        str: The shareable links and current sharing status.
+        str: JSON with file metadata including shareable links and current permissions.
     """
     logger.info(
         f"[get_drive_shareable_link] Invoked. Email: '{user_google_email}', File ID: '{file_id}'"
@@ -1099,28 +1018,7 @@ async def get_drive_shareable_link(
         .execute
     )
 
-    output_parts = [
-        f"File: {file_metadata.get('name', 'Unknown')}",
-        f"ID: {file_id}",
-        f"Type: {file_metadata.get('mimeType', 'Unknown')}",
-        f"Shared: {file_metadata.get('shared', False)}",
-        "",
-        "Links:",
-        f"  View: {file_metadata.get('webViewLink', 'N/A')}",
-    ]
-
-    web_content_link = file_metadata.get("webContentLink")
-    if web_content_link:
-        output_parts.append(f"  Download: {web_content_link}")
-
-    permissions = file_metadata.get("permissions", [])
-    if permissions:
-        output_parts.append("")
-        output_parts.append("Current permissions:")
-        for perm in permissions:
-            output_parts.append(f"  - {format_permission_info(perm)}")
-
-    return "\n".join(output_parts)
+    return json.dumps(file_metadata)
 
 
 @server.tool()

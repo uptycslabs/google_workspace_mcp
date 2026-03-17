@@ -301,46 +301,50 @@ def _correct_time_format_for_api(
     return time_str
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Calendar List Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_calendars", is_read_only=True, service_type="calendar")
 @require_google_service("calendar", "calendar_read")
-async def list_calendars(service, user_google_email: str) -> str:
+async def list_calendars(service, user_google_email: str = "@") -> str:
     """
     Retrieves a list of calendars accessible to the authenticated user.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: A formatted list of the user's calendars (summary, ID, primary status).
+        str: JSON with list of accessible calendars including their IDs, summaries, and primary status.
     """
     logger.info(f"[list_calendars] Invoked. Email: '{user_google_email}'")
 
     calendar_list_response = await asyncio.to_thread(
         lambda: service.calendarList().list().execute()
     )
-    items = calendar_list_response.get("items", [])
-    if not items:
-        return f"No calendars found for {user_google_email}."
-
-    calendars_summary_list = [
-        f'- "{cal.get("summary", "No Summary")}"{" (Primary)" if cal.get("primary") else ""} (ID: {cal["id"]})'
-        for cal in items
-    ]
-    text_output = (
-        f"Successfully listed {len(items)} calendars for {user_google_email}:\n"
-        + "\n".join(calendars_summary_list)
-    )
-    logger.info(f"Successfully listed {len(items)} calendars for {user_google_email}.")
-    return text_output
+    logger.info(f"Successfully listed calendars for {user_google_email}.")
+    return json.dumps(calendar_list_response)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Calendar Events Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("get_events", is_read_only=True, service_type="calendar")
 @require_google_service("calendar", "calendar_read")
 async def get_events(
     service,
-    user_google_email: str,
+    user_google_email: str = "@",
     calendar_id: str = "primary",
     event_id: Optional[str] = None,
     time_min: Optional[str] = None,
@@ -355,7 +359,7 @@ async def get_events(
     You can also search for events by keyword by supplying the optional "query" param.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         calendar_id (str): The ID of the calendar to query. Use 'primary' for the user's primary calendar. Defaults to 'primary'. Calendar IDs can be obtained using `list_calendars`.
         event_id (Optional[str]): The ID of a specific event to retrieve. If provided, retrieves only this event and ignores time filtering parameters.
         time_min (Optional[str]): The start of the time range (inclusive) in RFC3339 format (e.g., '2024-05-12T10:00:00Z' or '2024-05-12'). If omitted, defaults to the current time. Ignored if event_id is provided.
@@ -366,7 +370,7 @@ async def get_events(
         include_attachments (bool): Whether to include attachment information in detailed event output. When True, shows attachment details (fileId, fileUrl, mimeType, title) for events that have attachments. Only applies when detailed=True. Set this to True when you need to view or access files that have been attached to calendar events, such as meeting documents, presentations, or other shared files. Defaults to False.
 
     Returns:
-        str: A formatted list of events (summary, start and end times, link) within the specified range, or detailed information for a single event if event_id is provided.
+        str: JSON with event data including summaries, start/end times, IDs, and links.
     """
     logger.info(
         f"[get_events] Raw parameters - event_id: '{event_id}', time_min: '{time_min}', time_max: '{time_max}', query: '{query}', detailed: {detailed}, include_attachments: {include_attachments}"
@@ -426,112 +430,13 @@ async def get_events(
             lambda: service.events().list(**request_params).execute()
         )
         items = events_result.get("items", [])
-    if not items:
-        if event_id:
-            return f"Event with ID '{event_id}' not found in calendar '{calendar_id}' for {user_google_email}."
-        else:
-            return f"No events found in calendar '{calendar_id}' for {user_google_email} for the specified time range."
-
-    # Handle returning detailed output for a single event when requested
-    if event_id and detailed:
-        item = items[0]
-        summary = item.get("summary", "No Title")
-        start = item["start"].get("dateTime", item["start"].get("date"))
-        end = item["end"].get("dateTime", item["end"].get("date"))
-        link = item.get("htmlLink", "No Link")
-        description = item.get("description", "No Description")
-        location = item.get("location", "No Location")
-        color_id = item.get("colorId", "None")
-        attendees = item.get("attendees", [])
-        attendee_emails = (
-            ", ".join([a.get("email", "") for a in attendees]) if attendees else "None"
-        )
-        attendee_details_str = _format_attendee_details(attendees, indent="  ")
-
-        event_details = (
-            f"Event Details:\n"
-            f"- Title: {summary}\n"
-            f"- Starts: {start}\n"
-            f"- Ends: {end}\n"
-            f"- Description: {description}\n"
-            f"- Location: {location}\n"
-            f"- Color ID: {color_id}\n"
-            f"- Attendees: {attendee_emails}\n"
-            f"- Attendee Details: {attendee_details_str}\n"
-        )
-
-        if include_attachments:
-            attachments = item.get("attachments", [])
-            attachment_details_str = _format_attachment_details(
-                attachments, indent="  "
-            )
-            event_details += f"- Attachments: {attachment_details_str}\n"
-
-        event_details += f"- Event ID: {event_id}\n- Link: {link}"
-        logger.info(
-            f"[get_events] Successfully retrieved detailed event {event_id} for {user_google_email}."
-        )
-        return event_details
-
-    # Handle multiple events or single event with basic output
-    event_details_list = []
-    for item in items:
-        summary = item.get("summary", "No Title")
-        start_time = item["start"].get("dateTime", item["start"].get("date"))
-        end_time = item["end"].get("dateTime", item["end"].get("date"))
-        link = item.get("htmlLink", "No Link")
-        item_event_id = item.get("id", "No ID")
-
-        if detailed:
-            # Add detailed information for multiple events
-            description = item.get("description", "No Description")
-            location = item.get("location", "No Location")
-            attendees = item.get("attendees", [])
-            attendee_emails = (
-                ", ".join([a.get("email", "") for a in attendees])
-                if attendees
-                else "None"
-            )
-            attendee_details_str = _format_attendee_details(attendees, indent="    ")
-
-            event_detail_parts = (
-                f'- "{summary}" (Starts: {start_time}, Ends: {end_time})\n'
-                f"  Description: {description}\n"
-                f"  Location: {location}\n"
-                f"  Attendees: {attendee_emails}\n"
-                f"  Attendee Details: {attendee_details_str}\n"
-            )
-
-            if include_attachments:
-                attachments = item.get("attachments", [])
-                attachment_details_str = _format_attachment_details(
-                    attachments, indent="    "
-                )
-                event_detail_parts += f"  Attachments: {attachment_details_str}\n"
-
-            event_detail_parts += f"  ID: {item_event_id} | Link: {link}"
-            event_details_list.append(event_detail_parts)
-        else:
-            # Basic output format
-            event_details_list.append(
-                f'- "{summary}" (Starts: {start_time}, Ends: {end_time}) ID: {item_event_id} | Link: {link}'
-            )
 
     if event_id:
-        # Single event basic output
-        text_output = (
-            f"Successfully retrieved event from calendar '{calendar_id}' for {user_google_email}:\n"
-            + "\n".join(event_details_list)
-        )
+        logger.info(f"Successfully retrieved event {event_id} for {user_google_email}.")
+        return json.dumps(items[0] if items else {})
     else:
-        # Multiple events output
-        text_output = (
-            f"Successfully retrieved {len(items)} events from calendar '{calendar_id}' for {user_google_email}:\n"
-            + "\n".join(event_details_list)
-        )
-
-    logger.info(f"Successfully retrieved {len(items)} events for {user_google_email}.")
-    return text_output
+        logger.info(f"Successfully retrieved {len(items)} events for {user_google_email}.")
+        return json.dumps(events_result if items else {"items": []})
 
 
 @server.tool()
