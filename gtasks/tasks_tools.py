@@ -5,6 +5,7 @@ This module provides MCP tools for interacting with Google Tasks API.
 """
 
 import asyncio
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
@@ -67,12 +68,20 @@ def _adjust_due_max_for_tasks_api(due_max: str) -> str:
     return adjusted.isoformat()
 
 
-@server.tool()  # type: ignore
+@server.tool(  # type: ignore
+    annotations={
+        "title": "Task Lists Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("tasks", "tasks_read")  # type: ignore
 @handle_http_errors("list_task_lists", service_type="tasks")  # type: ignore
 async def list_task_lists(
     service: Resource,
-    user_google_email: str,
+    user_google_email: str = "@",
     max_results: int = 1000,
     page_token: Optional[str] = None,
 ) -> str:
@@ -80,12 +89,12 @@ async def list_task_lists(
     List all task lists for the user.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         max_results (int): Maximum number of task lists to return (default: 1000, max: 1000).
         page_token (Optional[str]): Token for pagination.
 
     Returns:
-        str: List of task lists with their IDs, titles, and details.
+        str: JSON with list of task lists including IDs, titles, and details.
     """
     logger.info(f"[list_task_lists] Invoked. Email: '{user_google_email}'")
 
@@ -104,16 +113,8 @@ async def list_task_lists(
         if not task_lists:
             return f"No task lists found for {user_google_email}."
 
-        response = f"Task Lists for {user_google_email}:\n"
-        for task_list in task_lists:
-            response += f"- {task_list['title']} (ID: {task_list['id']})\n"
-            response += f"  Updated: {task_list.get('updated', 'N/A')}\n"
-
-        if next_page_token:
-            response += f"\nNext page token: {next_page_token}"
-
         logger.info(f"Found {len(task_lists)} task lists for {user_google_email}")
-        return response
+        return json.dumps(result)
 
     except HttpError as error:
         message = f"API error: {error}. You might need to re-authenticate. LLM: Try 'start_google_auth' with the user's email ({user_google_email}) and service_name='Google Tasks'."
@@ -125,21 +126,29 @@ async def list_task_lists(
         raise Exception(message)
 
 
-@server.tool()  # type: ignore
+@server.tool(  # type: ignore
+    annotations={
+        "title": "Task List Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("tasks", "tasks_read")  # type: ignore
 @handle_http_errors("get_task_list", service_type="tasks")  # type: ignore
 async def get_task_list(
-    service: Resource, user_google_email: str, task_list_id: str
+    service: Resource, user_google_email: str = "@", task_list_id: str = ""
 ) -> str:
     """
     Get details of a specific task list.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         task_list_id (str): The ID of the task list to retrieve.
 
     Returns:
-        str: Task list details including title, ID, and last updated time.
+        str: JSON with task list details including title, ID, and last updated time.
     """
     logger.info(
         f"[get_task_list] Invoked. Email: '{user_google_email}', Task List ID: {task_list_id}"
@@ -150,16 +159,10 @@ async def get_task_list(
             service.tasklists().get(tasklist=task_list_id).execute
         )
 
-        response = f"""Task List Details for {user_google_email}:
-- Title: {task_list["title"]}
-- ID: {task_list["id"]}
-- Updated: {task_list.get("updated", "N/A")}
-- Self Link: {task_list.get("selfLink", "N/A")}"""
-
         logger.info(
             f"Retrieved task list '{task_list['title']}' for {user_google_email}"
         )
-        return response
+        return json.dumps(task_list)
 
     except HttpError as error:
         message = f"API error: {error}. You might need to re-authenticate. LLM: Try 'start_google_auth' with the user's email ({user_google_email}) and service_name='Google Tasks'."
@@ -305,13 +308,21 @@ async def delete_task_list(
         raise Exception(message)
 
 
-@server.tool()  # type: ignore
+@server.tool(  # type: ignore
+    annotations={
+        "title": "Tasks Lister",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("tasks", "tasks_read")  # type: ignore
 @handle_http_errors("list_tasks", service_type="tasks")  # type: ignore
 async def list_tasks(
     service: Resource,
-    user_google_email: str,
-    task_list_id: str,
+    user_google_email: str = "@",
+    task_list_id: str = "",
     max_results: int = LIST_TASKS_MAX_RESULTS_DEFAULT,
     page_token: Optional[str] = None,
     show_completed: bool = True,
@@ -328,7 +339,7 @@ async def list_tasks(
     List all tasks in a specific task list.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         task_list_id (str): The ID of the task list to retrieve tasks from.
         max_results (int): Maximum number of tasks to return. (default: 20, max: 10000).
         page_token (Optional[str]): Token for pagination.
@@ -343,7 +354,7 @@ async def list_tasks(
         updated_min (Optional[str]): Lower bound for last modification time (RFC 3339 timestamp).
 
     Returns:
-        str: List of tasks with their details.
+        str: JSON with list of tasks including status, due dates, and hierarchy.
     """
     logger.info(
         f"[list_tasks] Invoked. Email: '{user_google_email}', Task List ID: {task_list_id}"
@@ -411,18 +422,10 @@ async def list_tasks(
                 f"No tasks found in task list {task_list_id} for {user_google_email}."
             )
 
-        structured_tasks = get_structured_tasks(tasks)
-
-        response = f"Tasks in list {task_list_id} for {user_google_email}:\n"
-        response += serialize_tasks(structured_tasks, 0)
-
-        if next_page_token:
-            response += f"Next page token: {next_page_token}\n"
-
         logger.info(
             f"Found {len(tasks)} tasks in list {task_list_id} for {user_google_email}"
         )
-        return response
+        return json.dumps({"task_list_id": task_list_id, "count": len(tasks), "items": tasks, "nextPageToken": next_page_token})
 
     except HttpError as error:
         message = f"API error: {error}. You might need to re-authenticate. LLM: Try 'start_google_auth' with the user's email ({user_google_email}) and service_name='Google Tasks'."
@@ -549,22 +552,30 @@ This can also occur due to filtering that excludes parent tasks while including 
     return response
 
 
-@server.tool()  # type: ignore
+@server.tool(  # type: ignore
+    annotations={
+        "title": "Task Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("tasks", "tasks_read")  # type: ignore
 @handle_http_errors("get_task", service_type="tasks")  # type: ignore
 async def get_task(
-    service: Resource, user_google_email: str, task_list_id: str, task_id: str
+    service: Resource, user_google_email: str = "@", task_list_id: str = "", task_id: str = ""
 ) -> str:
     """
     Get details of a specific task.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         task_list_id (str): The ID of the task list containing the task.
         task_id (str): The ID of the task to retrieve.
 
     Returns:
-        str: Task details including title, notes, status, due date, etc.
+        str: JSON with task details including title, notes, status, due date, and links.
     """
     logger.info(
         f"[get_task] Invoked. Email: '{user_google_email}', Task List ID: {task_list_id}, Task ID: {task_id}"
@@ -575,31 +586,10 @@ async def get_task(
             service.tasks().get(tasklist=task_list_id, task=task_id).execute
         )
 
-        response = f"""Task Details for {user_google_email}:
-- Title: {task.get("title", "Untitled")}
-- ID: {task["id"]}
-- Status: {task.get("status", "N/A")}
-- Updated: {task.get("updated", "N/A")}"""
-
-        if task.get("due"):
-            response += f"\n- Due Date: {task['due']}"
-        if task.get("completed"):
-            response += f"\n- Completed: {task['completed']}"
-        if task.get("notes"):
-            response += f"\n- Notes: {task['notes']}"
-        if task.get("parent"):
-            response += f"\n- Parent Task ID: {task['parent']}"
-        if task.get("position"):
-            response += f"\n- Position: {task['position']}"
-        if task.get("selfLink"):
-            response += f"\n- Self Link: {task['selfLink']}"
-        if task.get("webViewLink"):
-            response += f"\n- Web View Link: {task['webViewLink']}"
-
         logger.info(
             f"Retrieved task '{task.get('title', 'Untitled')}' for {user_google_email}"
         )
-        return response
+        return json.dumps(task)
 
     except HttpError as error:
         message = f"API error: {error}. You might need to re-authenticate. LLM: Try 'start_google_auth' with the user's email ({user_google_email}) and service_name='Google Tasks'."

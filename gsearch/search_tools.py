@@ -4,6 +4,7 @@ Google Custom Search (PSE) MCP Tools
 This module provides MCP tools for interacting with Google Programmable Search Engine.
 """
 
+import json
 import logging
 import asyncio
 import os
@@ -16,13 +17,21 @@ from core.utils import handle_http_errors
 logger = logging.getLogger(__name__)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Custom Search",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("search_custom", is_read_only=True, service_type="customsearch")
 @require_google_service("customsearch", "customsearch")
 async def search_custom(
     service,
-    user_google_email: str,
-    q: str,
+    user_google_email: str = "@",
+    q: str = "",
     num: int = 10,
     start: int = 1,
     safe: Literal["active", "moderate", "off"] = "off",
@@ -38,7 +47,7 @@ async def search_custom(
     Performs a search using Google Custom Search JSON API.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         q (str): The search query. Required.
         num (int): Number of results to return (1-10). Defaults to 10.
         start (int): The index of the first result to return (1-based). Defaults to 1.
@@ -52,7 +61,7 @@ async def search_custom(
         country (Optional[str]): Country code for results (e.g., "countryUS").
 
     Returns:
-        str: Formatted search results including title, link, and snippet for each result.
+        str: JSON with search results including titles, URLs, snippets, and pagination info.
     """
     # Get API key and search engine ID from environment
     api_key = os.environ.get("GOOGLE_PSE_API_KEY")
@@ -108,67 +117,32 @@ async def search_custom(
     # Extract search results
     items = result.get("items", [])
 
-    # Format the response
-    confirmation_message = f"""Search Results for {user_google_email}:
-- Query: "{q}"
-- Search Engine ID: {cx}
-- Total Results: {total_results}
-- Search Time: {search_time:.3f} seconds
-- Results Returned: {len(items)} (showing {start} to {start + len(items) - 1})
-
-"""
-
-    if items:
-        confirmation_message += "Results:\n"
-        for i, item in enumerate(items, start):
-            title = item.get("title", "No title")
-            link = item.get("link", "No link")
-            snippet = item.get("snippet", "No description available").replace("\n", " ")
-
-            confirmation_message += f"\n{i}. {title}\n"
-            confirmation_message += f"   URL: {link}\n"
-            confirmation_message += f"   Snippet: {snippet}\n"
-
-            # Add additional metadata if available
-            if "pagemap" in item:
-                pagemap = item["pagemap"]
-                if "metatags" in pagemap and pagemap["metatags"]:
-                    metatag = pagemap["metatags"][0]
-                    if "og:type" in metatag:
-                        confirmation_message += f"   Type: {metatag['og:type']}\n"
-                    if "article:published_time" in metatag:
-                        confirmation_message += (
-                            f"   Published: {metatag['article:published_time'][:10]}\n"
-                        )
-    else:
-        confirmation_message += "\nNo results found."
-
-    # Add information about pagination
-    queries = result.get("queries", {})
-    if "nextPage" in queries:
-        next_start = queries["nextPage"][0].get("startIndex", 0)
-        confirmation_message += (
-            f"\n\nTo see more results, search again with start={next_start}"
-        )
-
     logger.info(f"Search completed successfully for {user_google_email}")
-    return confirmation_message
+    return json.dumps(result)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Search Engine Info Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "get_search_engine_info", is_read_only=True, service_type="customsearch"
 )
 @require_google_service("customsearch", "customsearch")
-async def get_search_engine_info(service, user_google_email: str) -> str:
+async def get_search_engine_info(service, user_google_email: str = "@") -> str:
     """
     Retrieves metadata about a Programmable Search Engine.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
 
     Returns:
-        str: Information about the search engine including its configuration and available refinements.
+        str: JSON with search engine configuration and metadata.
     """
     # Get API key and search engine ID from environment
     api_key = os.environ.get("GOOGLE_PSE_API_KEY")
@@ -201,41 +175,28 @@ async def get_search_engine_info(service, user_google_email: str) -> str:
     context = result.get("context", {})
     title = context.get("title", "Unknown")
 
-    confirmation_message = f"""Search Engine Information for {user_google_email}:
-- Search Engine ID: {cx}
-- Title: {title}
-"""
-
-    # Add facet information if available
-    if "facets" in context:
-        confirmation_message += "\nAvailable Refinements:\n"
-        for facet in context["facets"]:
-            for item in facet:
-                label = item.get("label", "Unknown")
-                anchor = item.get("anchor", "Unknown")
-                confirmation_message += f"  - {label} (anchor: {anchor})\n"
-
-    # Add search information
-    search_info = result.get("searchInformation", {})
-    if search_info:
-        total_results = search_info.get("totalResults", "Unknown")
-        confirmation_message += "\nSearch Statistics:\n"
-        confirmation_message += f"  - Total indexed results: {total_results}\n"
-
     logger.info(f"Search engine info retrieved successfully for {user_google_email}")
-    return confirmation_message
+    return json.dumps(result)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Site-Restricted Custom Search",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors(
     "search_custom_siterestrict", is_read_only=True, service_type="customsearch"
 )
 @require_google_service("customsearch", "customsearch")
 async def search_custom_siterestrict(
     service,
-    user_google_email: str,
-    q: str,
-    sites: List[str],
+    user_google_email: str = "@",
+    q: str = "",
+    sites: List[str] = None,
     num: int = 10,
     start: int = 1,
     safe: Literal["active", "moderate", "off"] = "off",
@@ -244,7 +205,7 @@ async def search_custom_siterestrict(
     Performs a search restricted to specific sites using Google Custom Search.
 
     Args:
-        user_google_email (str): The user's Google email address. Required.
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
         q (str): The search query. Required.
         sites (List[str]): List of sites/domains to search within.
         num (int): Number of results to return (1-10). Defaults to 10.
@@ -252,7 +213,7 @@ async def search_custom_siterestrict(
         safe (Literal["active", "moderate", "off"]): Safe search level. Defaults to "off".
 
     Returns:
-        str: Formatted search results from the specified sites.
+        str: JSON with search results from the specified sites.
     """
     logger.info(
         f"[search_custom_siterestrict] Invoked. Email: '{user_google_email}', Query: '{q}', Sites: {sites}"

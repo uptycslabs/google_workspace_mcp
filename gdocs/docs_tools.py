@@ -49,20 +49,31 @@ import json
 logger = logging.getLogger(__name__)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Docs Search",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("search_docs", is_read_only=True, service_type="docs")
 @require_google_service("drive", "drive_read")
 async def search_docs(
     service: Any,
-    user_google_email: str,
-    query: str,
+    user_google_email: str = "@",
+    query: str = "",
     page_size: int = 10,
 ) -> str:
     """
     Searches for Google Docs by name using Drive API (mimeType filter).
 
+    Args:
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
+
     Returns:
-        str: A formatted list of Google Docs matching the search query.
+        str: JSON with list of Google Docs matching the search query including IDs and links.
     """
     logger.info(f"[search_docs] Email={user_google_email}, Query='{query}'")
 
@@ -83,15 +94,18 @@ async def search_docs(
     if not files:
         return f"No Google Docs found matching '{query}'."
 
-    output = [f"Found {len(files)} Google Docs matching '{query}':"]
-    for f in files:
-        output.append(
-            f"- {f['name']} (ID: {f['id']}) Modified: {f.get('modifiedTime')} Link: {f.get('webViewLink')}"
-        )
-    return "\n".join(output)
+    return json.dumps(response)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Doc Content Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("get_doc_content", is_read_only=True, service_type="docs")
 @require_multiple_services(
     [
@@ -106,16 +120,19 @@ async def search_docs(
 async def get_doc_content(
     drive_service: Any,
     docs_service: Any,
-    user_google_email: str,
-    document_id: str,
+    user_google_email: str = "@",
+    document_id: str = "",
 ) -> str:
     """
     Retrieves content of a Google Doc or a Drive file (like .docx) identified by document_id.
     - Native Google Docs: Fetches content via Docs API.
     - Office files (.docx, etc.) stored in Drive: Downloads via Drive API and extracts text.
 
+    Args:
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
+
     Returns:
-        str: The document content with metadata header.
+        str: JSON with document metadata and content.
     """
     logger.info(
         f"[get_doc_content] Invoked. Document/File ID: '{document_id}' for user '{user_google_email}'"
@@ -269,24 +286,37 @@ async def get_doc_content(
                     f"{len(file_content_bytes)} bytes]"
                 )
 
-    header = (
-        f'File: "{file_name}" (ID: {document_id}, Type: {mime_type})\n'
-        f"Link: {web_view_link}\n\n--- CONTENT ---\n"
-    )
-    return header + body_text
+    return json.dumps({
+        "file_name": file_name,
+        "document_id": document_id,
+        "mime_type": mime_type,
+        "web_view_link": web_view_link,
+        "content": body_text,
+    })
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Docs Folder Lister",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("list_docs_in_folder", is_read_only=True, service_type="docs")
 @require_google_service("drive", "drive_read")
 async def list_docs_in_folder(
-    service: Any, user_google_email: str, folder_id: str = "root", page_size: int = 100
+    service: Any, user_google_email: str = "@", folder_id: str = "root", page_size: int = 100
 ) -> str:
     """
     Lists Google Docs within a specific Drive folder.
 
+    Args:
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
+
     Returns:
-        str: A formatted list of Google Docs in the specified folder.
+        str: JSON with list of Google Docs in the specified folder.
     """
     logger.info(
         f"[list_docs_in_folder] Invoked. Email: '{user_google_email}', Folder ID: '{folder_id}'"
@@ -306,12 +336,7 @@ async def list_docs_in_folder(
     items = rsp.get("files", [])
     if not items:
         return f"No Google Docs found in folder '{folder_id}'."
-    out = [f"Found {len(items)} Docs in folder '{folder_id}':"]
-    for f in items:
-        out.append(
-            f"- {f['name']} (ID: {f['id']}) Modified: {f.get('modifiedTime')} Link: {f.get('webViewLink')}"
-        )
-    return "\n".join(out)
+    return json.dumps(rsp)
 
 
 @server.tool()
@@ -894,13 +919,21 @@ async def batch_update_doc(
         return f"Error: {message}"
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Doc Structure Inspector",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("inspect_doc_structure", is_read_only=True, service_type="docs")
 @require_google_service("docs", "docs_read")
 async def inspect_doc_structure(
     service: Any,
-    user_google_email: str,
-    document_id: str,
+    user_google_email: str = "@",
+    document_id: str = "",
     detailed: bool = False,
 ) -> str:
     """
@@ -1018,8 +1051,7 @@ async def inspect_doc_structure(
                     }
                 )
 
-    link = f"https://docs.google.com/document/d/{document_id}/edit"
-    return f"Document structure analysis for {document_id}:\n\n{json.dumps(result, indent=2)}\n\nLink: {link}"
+    return json.dumps(result)
 
 
 @server.tool()
@@ -1120,13 +1152,21 @@ async def create_table_with_data(
         return f"ERROR: {message}"
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Google Doc Table Structure Debugger",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @handle_http_errors("debug_table_structure", is_read_only=True, service_type="docs")
 @require_google_service("docs", "docs_read")
 async def debug_table_structure(
     service: Any,
-    user_google_email: str,
-    document_id: str,
+    user_google_email: str = "@",
+    document_id: str = "",
     table_index: int = 0,
 ) -> str:
     """
@@ -1164,7 +1204,7 @@ async def debug_table_structure(
         table_index: Which table to debug (0 = first table, 1 = second table, etc.)
 
     Returns:
-        str: Detailed JSON structure showing table layout, cell positions, and current content
+        str: JSON with detailed table layout including cell positions and current content.
     """
     logger.debug(
         f"[debug_table_structure] Doc={document_id}, table_index={table_index}"
@@ -1203,8 +1243,7 @@ async def debug_table_structure(
             row_info.append(cell_debug)
         debug_info["cells"].append(row_info)
 
-    link = f"https://docs.google.com/document/d/{document_id}/edit"
-    return f"Table structure debug for table {table_index}:\n\n{json.dumps(debug_info, indent=2)}\n\nLink: {link}"
+    return json.dumps(debug_info)
 
 
 @server.tool()
