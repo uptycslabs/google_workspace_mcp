@@ -4,6 +4,7 @@ Google Chat MCP Tools
 This module provides MCP tools for interacting with Google Chat API.
 """
 
+import json
 import logging
 import asyncio
 from typing import Optional
@@ -18,20 +19,31 @@ from core.utils import handle_http_errors
 logger = logging.getLogger(__name__)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Chat Spaces Lister",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("chat", "chat_read")
 @handle_http_errors("list_spaces", service_type="chat")
 async def list_spaces(
     service,
-    user_google_email: str,
+    user_google_email: str = "@",
     page_size: int = 100,
     space_type: str = "all",  # "all", "room", "dm"
 ) -> str:
     """
     Lists Google Chat spaces (rooms and direct messages) accessible to the user.
 
+    Args:
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
+
     Returns:
-        str: A formatted list of Google Chat spaces accessible to the user.
+        str: JSON with list of accessible Chat spaces and metadata.
     """
     logger.info(f"[list_spaces] Email={user_google_email}, Type={space_type}")
 
@@ -52,31 +64,35 @@ async def list_spaces(
     if not spaces:
         return f"No Chat spaces found for type '{space_type}'."
 
-    output = [f"Found {len(spaces)} Chat spaces (type: {space_type}):"]
-    for space in spaces:
-        space_name = space.get("displayName", "Unnamed Space")
-        space_id = space.get("name", "")
-        space_type_actual = space.get("spaceType", "UNKNOWN")
-        output.append(f"- {space_name} (ID: {space_id}, Type: {space_type_actual})")
-
-    return "\n".join(output)
+    return json.dumps(response)
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Chat Messages Retriever",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("chat", "chat_read")
 @handle_http_errors("get_messages", service_type="chat")
 async def get_messages(
     service,
-    user_google_email: str,
-    space_id: str,
+    user_google_email: str = "@",
+    space_id: str = "",
     page_size: int = 50,
     order_by: str = "createTime desc",
 ) -> str:
     """
     Retrieves messages from a Google Chat space.
 
+    Args:
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
+
     Returns:
-        str: Formatted messages from the specified space.
+        str: JSON with messages from the specified space including sender, time, and content.
     """
     logger.info(f"[get_messages] Space ID: '{space_id}' for user '{user_google_email}'")
 
@@ -96,18 +112,7 @@ async def get_messages(
     if not messages:
         return f"No messages found in space '{space_name}' (ID: {space_id})."
 
-    output = [f"Messages from '{space_name}' (ID: {space_id}):\n"]
-    for msg in messages:
-        sender = msg.get("sender", {}).get("displayName", "Unknown Sender")
-        create_time = msg.get("createTime", "Unknown Time")
-        text_content = msg.get("text", "No text content")
-        msg_name = msg.get("name", "")
-
-        output.append(f"[{create_time}] {sender}:")
-        output.append(f"  {text_content}")
-        output.append(f"  (Message ID: {msg_name})\n")
-
-    return "\n".join(output)
+    return json.dumps({"space": space_info, "messages": response})
 
 
 @server.tool()
@@ -149,21 +154,32 @@ async def send_message(
     return msg
 
 
-@server.tool()
+@server.tool(
+    annotations={
+        "title": "Chat Messages Search",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 @require_google_service("chat", "chat_read")
 @handle_http_errors("search_messages", service_type="chat")
 async def search_messages(
     service,
-    user_google_email: str,
-    query: str,
+    user_google_email: str = "@",
+    query: str = "",
     space_id: Optional[str] = None,
     page_size: int = 25,
 ) -> str:
     """
     Searches for messages in Google Chat spaces by text content.
 
+    Args:
+        user_google_email (str): The user's Google email address. Defaults to '@' (applies to all users).
+
     Returns:
-        str: A formatted list of messages matching the search query.
+        str: JSON with messages matching the search query across Chat spaces.
     """
     logger.info(f"[search_messages] Email={user_google_email}, Query='{query}'")
 
@@ -207,17 +223,4 @@ async def search_messages(
     if not messages:
         return f"No messages found matching '{query}' in {context}."
 
-    output = [f"Found {len(messages)} messages matching '{query}' in {context}:"]
-    for msg in messages:
-        sender = msg.get("sender", {}).get("displayName", "Unknown Sender")
-        create_time = msg.get("createTime", "Unknown Time")
-        text_content = msg.get("text", "No text content")
-        space_name = msg.get("_space_name", "Unknown Space")
-
-        # Truncate long messages
-        if len(text_content) > 100:
-            text_content = text_content[:100] + "..."
-
-        output.append(f"- [{create_time}] {sender} in '{space_name}': {text_content}")
-
-    return "\n".join(output)
+    return json.dumps({"count": len(messages), "context": context, "messages": messages})
