@@ -1,12 +1,13 @@
 # auth/google_auth.py
 
+from datetime import timedelta, datetime
 import asyncio
 import json
 import jwt
 import logging
 import os
 
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any, Callable
 from urllib.parse import parse_qs, urlparse
 
 from google.oauth2.credentials import Credentials
@@ -531,7 +532,7 @@ def get_credentials(
 ) -> Optional[Credentials]:
     """
     Retrieves stored credentials with the following priority:
-    1. GOOGLE_ACCESS_TOKEN env var (direct token injection for stdio mode)
+    1. GOOGLE_OAUTH_ACCESS_TOKEN env var (direct token injection for stdio mode)
     2. OAuth 2.1 session store (if session_id provided)
     3. Single-user mode file-based credentials (if MCP_SINGLE_USER_MODE=1)
     4. Session-based credentials
@@ -540,7 +541,7 @@ def get_credentials(
     If credentials are loaded from file and a session_id is present, they are cached in the session.
 
     Environment Variables:
-        GOOGLE_ACCESS_TOKEN: Direct access token to use (bypasses OAuth flow).
+        GOOGLE_OAUTH_ACCESS_TOKEN: Direct access token to use (bypasses OAuth flow).
             Note: Token refresh won't work since no refresh token is available.
 
     Args:
@@ -560,12 +561,22 @@ def get_credentials(
         logger.info(
             "[get_credentials] Using direct access token from GOOGLE_OAUTH_ACCESS_TOKEN environment variable"
         )
+
+        # For case of direct access token, we need to provide a custom refresh handler in order to bypass the
+        # refresh flow. This custom handler returns the same access token with arbitrary expiry time.
+        # This is because the google_auth library internally tries to refresh the token in cases of 401 errors
+        # (caused by insufficient permissions). We expect the direct_access_token provider to handle refresh.
+        refresh_handler: Callable[[Request, Sequence[str]], [str, datetime]] = lambda request, scopes: (direct_access_token, datetime.now() + timedelta(hours=1))
+
         # Create credentials from the direct token
         # Note: No refresh token available, so token refresh won't work
         # Expect the direct_access_token provider to handle refresh
         credentials = Credentials(
             token=direct_access_token,
             scopes=required_scopes,
+            refresh_token=None,
+            enable_reauth_refresh=False,
+            refresh_handler=refresh_handler,
         )
 
         if not credentials.valid:
