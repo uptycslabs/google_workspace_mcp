@@ -21,6 +21,7 @@ from gsheets.sheets_helpers import (
     _build_gradient_rule,
     _fetch_detailed_sheet_errors,
     _fetch_sheets_with_rules,
+    _flatten_sheet_values,
     _format_conditional_rules_section,
     _format_sheet_error_section,
     _parse_a1_range,
@@ -206,8 +207,16 @@ async def read_sheet_values(
     if not values:
         return f"No data found in range '{range_name}' for {user_google_email}."
 
+    rows = _flatten_sheet_values(values)
+
     logger.info(f"Successfully read {len(values)} rows for {user_google_email}.")
-    return json.dumps(result)
+    return json.dumps(
+        {
+            "spreadsheetId": spreadsheet_id,
+            "range": result.get("range", range_name),
+            "rows": rows,
+        }
+    )
 
 
 @server.tool()
