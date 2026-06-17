@@ -240,6 +240,17 @@ def _values_contain_sheets_errors(values: List[List[object]]) -> bool:
     return False
 
 
+def _flatten_sheet_values(values: List[List[object]]) -> List[dict]:
+    """Zip the header row (row 0) onto each data row, padding short rows with ""."""
+    if len(values) < 2:
+        return []
+    headers = [str(cell) for cell in values[0]]
+    return [
+        {header: (row[i] if i < len(row) else "") for i, header in enumerate(headers)}
+        for row in values[1:]
+    ]
+
+
 def _a1_range_for_values(a1_range: str, values: List[List[object]]) -> Optional[str]:
     """
     Compute a tight A1 range for a returned values matrix.
