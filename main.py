@@ -309,21 +309,33 @@ def main():
         else:
             safe_print("")
             safe_print("🚀 Starting STDIO server")
-            # Start minimal OAuth callback server for stdio mode
-            from auth.oauth_callback_server import ensure_oauth_callback_available
+            # Skip the minimal OAuth callback server when a direct access token is
+            # supplied — authentication is handled externally in that case, so the
+            # server's own OAuth flow (and its callback endpoint) is never used.
+            from auth.google_auth import is_direct_access_token_mode
 
-            success, error_msg = ensure_oauth_callback_available(
-                "stdio", port, base_uri
-            )
-            if success:
+            if is_direct_access_token_mode():
                 safe_print(
-                    f"   OAuth callback server started on {display_url}/oauth2callback"
+                    "   Using GOOGLE_OAUTH_ACCESS_TOKEN — skipping OAuth callback server"
                 )
             else:
-                warning_msg = "   ⚠️  Warning: Failed to start OAuth callback server"
-                if error_msg:
-                    warning_msg += f": {error_msg}"
-                safe_print(warning_msg)
+                # Start minimal OAuth callback server for stdio mode
+                from auth.oauth_callback_server import ensure_oauth_callback_available
+
+                success, error_msg = ensure_oauth_callback_available(
+                    "stdio", port, base_uri
+                )
+                if success:
+                    safe_print(
+                        f"   OAuth callback server started on {display_url}/oauth2callback"
+                    )
+                else:
+                    warning_msg = (
+                        "   ⚠️  Warning: Failed to start OAuth callback server"
+                    )
+                    if error_msg:
+                        warning_msg += f": {error_msg}"
+                    safe_print(warning_msg)
 
         safe_print("✅ Ready for MCP connections")
         safe_print("")
