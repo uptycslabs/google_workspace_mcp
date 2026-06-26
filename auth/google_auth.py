@@ -72,6 +72,16 @@ else:
 # --- Helper Functions ---
 
 
+def is_direct_access_token_mode() -> bool:
+    """Check whether a direct access token is supplied via GOOGLE_OAUTH_ACCESS_TOKEN.
+
+    When set, authentication is handled externally: credentials are built directly
+    from the provided token and the server's own OAuth flow (including the minimal
+    OAuth callback server) is unnecessary and should be skipped.
+    """
+    return bool(os.getenv("GOOGLE_OAUTH_ACCESS_TOKEN"))
+
+
 def _find_any_credentials(
     base_dir: str = DEFAULT_CREDENTIALS_DIR,
 ) -> Optional[Credentials]:
@@ -909,6 +919,17 @@ async def get_authenticated_google_service(
         logger.warning(
             f"[{tool_name}] No valid credentials. Email: '{user_google_email}'."
         )
+
+        # When a direct access token is supplied, authentication is handled
+        # externally. Do not start the internal OAuth flow / callback server;
+        # instead, signal that the externally-provided token must be refreshed.
+        if is_direct_access_token_mode():
+            raise GoogleAuthenticationError(
+                f"Authentication failed for {tool_name}: the access token provided via "
+                "GOOGLE_OAUTH_ACCESS_TOKEN is missing or invalid. Refresh the token "
+                "externally and retry. The internal OAuth flow is disabled in this mode."
+            )
+
         logger.info(
             f"[{tool_name}] Valid email '{user_google_email}' provided, initiating auth flow."
         )
